@@ -1,0 +1,196 @@
+/* ============================================================
+   Binary1702 — self-hosted fonts (variable, latin subset)
+   Playfair Display 400–500 + italic 400; Archivo Narrow 400–600.
+   ============================================================ */
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400 500;
+  font-display: swap;
+  src: url('/fonts/playfair-display-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/playfair-display-italic-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Archivo Narrow';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/archivo-narrow-latin.woff2') format('woff2');
+}
+
+/* ============================================================
+   Binary1702 — design tokens
+   Light theme lives on :root; .theme-dark re-maps the same
+   variables, so a page opts into dark by wrapping its root div.
+   ============================================================ */
+:root {
+  --pace: 1;
+  --theme-fade: 2s; /* theme cross-fade duration, both directions */
+  --paper: #F5F2EA; --muted: #ECE8DF; --ink: #141414; --graphite: #565656;
+  --faint: #6E6E6E; --rule: #CFC8BC; --sig: #2F2348; --sig-text: #2F2348; --sel: #E4DFD2;
+  --room-bg: #1A1A22; --room-fg: #F5F2EA; --room-muted: #CFC8BC; --room-rule: #F5F2EA;
+  color-scheme: light;
+}
+
+.theme-dark {
+  --paper: #111214; --muted: #16181B; --ink: #F2EFE7; --graphite: #B7B1A6;
+  --faint: rgba(242, 239, 231, 0.42); --rule: rgba(242, 239, 231, 0.12);
+  --sig: #4A3F78; --sig-text: #8C7EC4; --sel: #2A2440;
+  --room-bg: #0B0C0E; --room-fg: #F2EFE7; --room-muted: #B7B1A6; --room-rule: #F2EFE7;
+  color-scheme: dark;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* Theme switch cross-fade: every colored surface is body or a section
+   (page wrappers set background via inline style on divs that inherit
+   from these), so this is the whole set — no global * transition. */
+body,
+body > div,
+section {
+  transition: background-color var(--theme-fade) ease;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+::selection { background: var(--sel); }
+
+a:focus-visible,
+button:focus-visible {
+  outline: 1px solid var(--sig-text);
+  outline-offset: 4px;
+}
+
+/* Animated hairline that draws across a row on hover */
+[data-rule] { position: relative; }
+[data-rule]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -1px;
+  width: 100%;
+  height: 1px;
+  background: var(--sig-text);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 150ms linear;
+}
+[data-rule]:hover::after { transform: scaleX(1); }
+
+/* Form fields (conversation page) */
+input, textarea, button { font: inherit; color: inherit; }
+input::placeholder, textarea::placeholder { color: var(--faint); }
+input:focus, textarea:focus {
+  outline: none;
+  border-bottom-color: var(--sig) !important;
+}
+
+/* ============================================================
+   Interactive link variants (base + hover live together here so
+   hover states win without !important — hover-affected properties
+   are NOT duplicated in inline styles)
+   ============================================================ */
+.nav-link {
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--graphite);
+  padding-bottom: 3px;
+  border-bottom: 1px solid transparent;
+  transition: color 150ms linear, border-bottom-color 150ms linear;
+}
+.nav-link:hover { color: var(--ink); border-bottom-color: var(--sig-text); }
+
+/* Sun/moon theme toggle — Tabler `sun` and `shadow` icons stacked in one
+   button, swapped by counter-rotating cross-fade. The inactive icon parks
+   rotated off-angle; toggling spins both through the swap on the asymmetric
+   --theme-fade timing (slow into day, quick into night). Icons inherit
+   color via currentColor, so they recolor with the theme for free. */
+.sun-moon {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--graphite);
+  cursor: pointer;
+  transition: color 150ms linear;
+}
+.sun-moon:hover { color: var(--ink); }
+
+.sun-moon svg {
+  position: absolute;
+  inset: 3px;
+  width: auto;
+  height: auto;
+  transition:
+    opacity var(--theme-fade) ease,
+    transform var(--theme-fade) ease;
+}
+
+/* light mode: sun in, shadowed disc parked rotated out */
+.sun-moon-day   { opacity: 1; transform: rotate(0deg); }
+.sun-moon-night { opacity: 0; transform: rotate(-90deg); }
+
+/* dark mode: counter-rotate through the swap */
+.theme-dark .sun-moon-day   { opacity: 0; transform: rotate(90deg); }
+.theme-dark .sun-moon-night { opacity: 1; transform: rotate(0deg); }
+
+/* Big serif links in "The Sequence" (Diagnosis / Build / Care) */
+.rule-link { border-bottom: 1px solid transparent; }
+.rule-link:hover { border-bottom-color: var(--sig-text); color: var(--ink); }
+
+/* Underline CTAs whose border thickens on hover; border itself stays
+   inline (color varies per instance), so the hover needs !important */
+.cta-link { transition: border-bottom-width 150ms linear; }
+.cta-link:hover { border-bottom-width: 2px !important; }
+
+.foot-link {
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--graphite);
+  transition: color 150ms linear;
+}
+.foot-link:hover { color: var(--ink); }
+
+.foot-cta {
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--graphite);
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--rule);
+  align-self: start;
+  transition: border-bottom-color 150ms linear;
+}
+.foot-cta:hover { border-bottom-color: var(--ink); }
+
+/* ============================================================
+   Responsive collapses (matching the template's breakpoints)
+   ============================================================ */
+@media (max-width: 900px) {
+  [data-after="1"], [data-after="2"], [data-principle] { margin-left: 0 !important; }
+  [data-band] { grid-template-columns: minmax(0, 1fr) !important; }
+}
