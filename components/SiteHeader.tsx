@@ -5,11 +5,21 @@ export default function SiteHeader() {
   return (
     <div
       style={{
-        maxWidth: 1320,
-        margin: "0 auto",
-        padding: "0 clamp(24px,5.5vw,96px)",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 100,
+        background: "var(--paper)",
       }}
     >
+      <div
+        style={{
+          maxWidth: 1320,
+          margin: "0 auto",
+          padding: "0 clamp(24px,5.5vw,96px)",
+        }}
+      >
       <header
         style={{
           display: "flex",
@@ -44,6 +54,7 @@ export default function SiteHeader() {
           <ThemeToggle />
         </nav>
       </header>
+      </div>
     </div>
   );
 }
