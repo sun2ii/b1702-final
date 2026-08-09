@@ -26,7 +26,7 @@ export default function SiteHeader() {
           justifyContent: "space-between",
           alignItems: "baseline",
           gap: 32,
-          padding: "30px 0 0",
+          padding: "30px 0 24px",
         }}
       >
         <Link
@@ -50,7 +50,7 @@ export default function SiteHeader() {
           <a href="#" className="nav-link">Studio</a>
           <a href="#" className="nav-link">Labs</a>
           <a href="#" className="nav-link">Journal</a>
-          <a href="#" className="nav-link">About</a>
+          <Link href="/about" className="nav-link">About</Link>
           <ThemeToggle />
         </nav>
       </header>
