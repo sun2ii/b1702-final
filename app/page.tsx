@@ -51,64 +51,7 @@ const bodyMd: CSSProperties = {
   textWrap: "pretty",
 };
 
-/* "What Gets Built" band pieces */
-const band: CSSProperties = {
-  borderTop: "1px solid var(--rule)",
-  padding: "calc(44px * var(--pace)) 0 calc(72px * var(--pace))",
-  display: "grid",
-  gridTemplateColumns: "minmax(0,1fr) minmax(0,1.25fr)",
-  gap: "clamp(20px,3.5vw,56px)",
-  alignItems: "start",
-};
-
-const bandTitle: CSSProperties = {
-  margin: 0,
-  fontFamily: serif,
-  fontSize: "clamp(1.5rem,2.4vw,2.05rem)",
-  lineHeight: 1.12,
-  letterSpacing: "-0.014em",
-  maxWidth: "16ch",
-  textAlign: "left",
-};
-
-const bandSub: CSSProperties = {
-  margin: "1.1em 0 0",
-  maxWidth: "26ch",
-  fontSize: "clamp(1.02rem,1.18vw,1.12rem)",
-  lineHeight: 1.68,
-  letterSpacing: "0.004em",
-  color: "var(--graphite)",
-  textWrap: "pretty",
-  textAlign: "left",
-};
-
-const bandItem: CSSProperties = {
-  margin: 0,
-  fontSize: "clamp(1.06rem,1.24vw,1.2rem)",
-  lineHeight: 1.3,
-  letterSpacing: "0.01em",
-  color: "var(--ink)",
-  textAlign: "left",
-};
-
-const bandList: CSSProperties = {
-  paddingTop: "0.4em",
-  display: "grid",
-  gap: "calc(26px * var(--pace))",
-  maxWidth: "30ch",
-  textAlign: "left",
-};
-
 /* "The Sequence" secondary rows (Build / Care) */
-const seqRow: CSSProperties = {
-  borderTop: "1px solid var(--rule)",
-  paddingTop: "calc(34px * var(--pace))",
-  display: "grid",
-  gridTemplateColumns: "minmax(0,1fr) minmax(0,1.35fr)",
-  gap: "clamp(28px,4vw,64px)",
-  alignItems: "baseline",
-};
-
 const seqRowLink: CSSProperties = {
   justifySelf: "start",
   fontFamily: serif,
@@ -212,12 +155,10 @@ export default function Home() {
           >
           Let's begin with clarity.
           </h1>
-          <div style={{ height: "calc(130px * var(--pace))" }} />
-          <p style={{ ...bodyLg, maxWidth: "42ch", fontSize: "clamp(1.16rem,1.4vw,1.38rem)" }}>
-            Binary1702 helps business owners make sense of complex problems before investing in technology.
-          </p>
-          <p style={{ ...bodyLg, margin: "1.6em 0 0", fontSize: "clamp(1.16rem,1.4vw,1.38rem)", textWrap: undefined }}>
-            We start with questions. 
+          <div style={{ height: "calc(230px * var(--pace))" }} />
+          <p style={{ ...bodyLg, maxWidth: "42ch", fontSize: "clamp(1.5rem,1.4vw,1.38rem)" }}>
+          Complex decisions deserves clear thinking.
+          Everything else, follows.
           </p>
         </div>
       </section>
@@ -243,17 +184,16 @@ export default function Home() {
             </h2>
             <div>
               <p style={{ ...bodyLg, margin: 0 }}>
-                A business asks for a website, a system, an automation, and gets
-                exactly that. Built well, delivered on time, aimed at the wrong
-                thing.
+                Technology rarely fails. Decisions do.
               </p>
               <p style={{ ...bodyLg, margin: "1.5em 0 0" }}>
-                That isn&apos;t anyone&apos;s fault. The request was made under
-                pressure, by someone with no good way to be sure.
+                Most technology is built to answer the wrong question.<br></br>
+                Perfectly executed.
+                Beautifully designed.
+                Entirely unnecessary.
               </p>
               <p style={{ ...bodyLg, margin: "1.5em 0 0", color: "var(--ink)" }}>
-                So we don&apos;t start with the request. We start with a look at
-                the business, and we say what we find.
+                We think the decision deserves more attention than the implementation. That's where we come in.
               </p>
             </div>
           </div>
@@ -291,7 +231,7 @@ export default function Home() {
                   color: "var(--sig-text)",
                 }}
               >
-                FROM $500
+                From $5,000
               </p>
 
               <p
@@ -309,8 +249,7 @@ export default function Home() {
               </p>
 
               <p style={{ ...bodyMd, margin: "calc(40px * var(--pace)) 0 0", maxWidth: "42ch" }}>
-                We look at how your business is understood, how it runs, and
-                what it sells, and we write down what we find.
+              We understand the business before changing it.
               </p>
 
               <p
@@ -327,7 +266,6 @@ export default function Home() {
                 }}
               >
                 Sometimes the answer is that nothing should be built.
-                We&apos;d rather tell you that early.
               </p>
             </div>
 
@@ -337,8 +275,7 @@ export default function Home() {
                   Build
                 </a>
                 <p style={{ ...seqRowText, margin: "0.8em 0 0" }}>
-                  Only after a Diagnosis. We price it then, because until then
-                  we&apos;d be guessing.
+                Tailored after Diagnosis.
                 </p>
               </div>
 
@@ -347,8 +284,7 @@ export default function Home() {
                   Care
                 </a>
                 <p style={{ ...seqRowText, margin: "0.8em 0 0" }}>
-                  Some work is finished. Most work is kept. When it&apos;s kept,
-                  it&apos;s kept by the people who understood it.
+                From $500/month.
                 </p>
               </div>
             </div>
@@ -356,143 +292,18 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 04 — What Gets Built */}
-      <section data-screen-label="04 What Gets Built" style={{ background: "var(--muted)", scrollSnapAlign: "start", minHeight: "100vh" }}>
-        <div style={sectionGrid(120, 140)}>
-          <div style={numeral("0.7em")}>04</div>
-          <div style={{ textAlign: "center" }}>
-            <a
-              href="#"
-              className="rule-link"
-              style={{
-                display: "inline-block",
-                fontFamily: serif,
-                fontSize: "clamp(3.2rem,9vw,8.2rem)",
-                lineHeight: 0.96,
-                letterSpacing: "-0.024em",
-                whiteSpace: "nowrap",
-              }}
-            >
-              Build
-            </a>
-
-            <div style={{ margin: "calc(60px * var(--pace)) 0 0", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "clamp(20px,3vw,48px)" }}>
-              <div style={{ background: "var(--paper)", border: "1px solid var(--rule)", borderRadius: 8, padding: "clamp(20px,3vw,32px)" }}>
-                <p style={bandTitle}>Identity</p>
-                <p style={bandSub}>
-                  How are you understood?
-                </p>
-                <div style={bandList}>
-                  <p style={bandItem}><span style={{ marginRight: "0.5em" }}>›</span>First impression</p>
-                  <p style={bandItem}><span style={{ marginRight: "0.5em" }}>›</span>Positioning</p>
-                  <p style={bandItem}><span style={{ marginRight: "0.5em" }}>›</span>Credibility</p>
-                  <p style={bandItem}><span style={{ marginRight: "0.5em" }}>›</span>Visibility</p>
-                  <p style={bandItem}><span style={{ marginRight: "0.5em" }}>›</span>Trust</p>
-                </div>
-              </div>
-
-              <div style={{ background: "var(--paper)", border: "1px solid var(--rule)", borderRadius: 8, padding: "clamp(20px,3vw,32px)" }}>
-                <p style={bandTitle}>Systems</p>
-                <p style={bandSub}>
-                  How do you operate?
-                </p>
-                <div style={bandList}>
-                  <p style={bandItem}><span style={{ marginRight: "0.5em" }}>›</span>Less manual work</p>
-                  <p style={bandItem}><span style={{ marginRight: "0.5em" }}>›</span>Reliable processes</p>
-                  <p style={bandItem}><span style={{ marginRight: "0.5em" }}>›</span>Systems that work together</p>
-                  <p style={bandItem}><span style={{ marginRight: "0.5em" }}>›</span>Operational clarity</p>
-                </div>
-              </div>
-
-              <div style={{ background: "var(--paper)", border: "1px solid var(--rule)", borderRadius: 8, padding: "clamp(20px,3vw,32px)" }}>
-                <p style={bandTitle}>Offerings</p>
-                <p style={bandSub}>What do you sell?</p>
-                <div style={bandList}>
-                  <p style={bandItem}><span style={{ marginRight: "0.5em" }}>›</span>Internal software</p>
-                  <p style={bandItem}><span style={{ marginRight: "0.5em" }}>›</span>Customer experiences</p>
-                  <p style={bandItem}><span style={{ marginRight: "0.5em" }}>›</span>Digital products</p>
-                  <p style={bandItem}><span style={{ marginRight: "0.5em" }}>›</span>New revenue</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 05 — Care */}
-      <section data-screen-label="05 Care" style={{ background: "var(--paper)", scrollSnapAlign: "start", minHeight: "100vh" }}>
-        <div style={sectionGrid(120, 130)}>
-          <div style={numeral("0.9em")}>05</div>
-          <div>
-            <div style={{ textAlign: "right" }}>
-              <a
-                href="#"
-                className="rule-link"
-                style={{
-                  display: "inline-block",
-                  fontFamily: serif,
-                  fontSize: "clamp(3.2rem,9vw,8.2rem)",
-                  lineHeight: 0.96,
-                  letterSpacing: "-0.024em",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                Care
-              </a>
-            </div>
-
-            <div style={{ margin: "calc(40px * var(--pace)) 0 0", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "clamp(24px,3vw,48px)" }}>
-              <div style={{ background: "var(--paper)", border: "1px solid var(--rule)", borderRadius: 8, padding: "clamp(24px,3.5vw,40px)", textAlign: "left" }}>
-                <p style={{ ...bandTitle, margin: 0 }}>Standard Care</p>
-                <p style={{ ...bandSub, margin: "1em 0 0", maxWidth: "none" }}>
-                  For businesses that need reliable ongoing support.
-                </p>
-                <div style={{ paddingTop: "1.5em", display: "grid", gap: "calc(12px * var(--pace))", maxWidth: "none" }}>
-                  <p style={{ ...bandItem, whiteSpace: "nowrap" }}><span style={{ marginRight: "0.5em" }}>›</span>Website & system maintenance</p>
-                  <p style={{ ...bandItem, whiteSpace: "nowrap" }}><span style={{ marginRight: "0.5em" }}>›</span>Security monitoring</p>
-                  <p style={{ ...bandItem, whiteSpace: "nowrap" }}><span style={{ marginRight: "0.5em" }}>›</span>Backups</p>
-                  <p style={{ ...bandItem, whiteSpace: "nowrap" }}><span style={{ marginRight: "0.5em" }}>›</span>Technical management</p>
-                  <p style={{ ...bandItem, whiteSpace: "nowrap" }}><span style={{ marginRight: "0.5em" }}>›</span>Monthly health review</p>
-                  <p style={{ ...bandItem, whiteSpace: "nowrap" }}><span style={{ marginRight: "0.5em" }}>›</span>48-hour response time</p>
-                  <p style={{ ...bandItem, whiteSpace: "nowrap" }}><span style={{ marginRight: "0.5em" }}>›</span>2 hours of implementation each month</p>
-                </div>
-                <p style={{ margin: "calc(40px * var(--pace)) 0 0", fontFamily: serif, fontSize: "clamp(1.3rem,1.8vw,1.6rem)", letterSpacing: "0.01em", color: "var(--ink)" }}>
-                  $500/month
-                </p>
-              </div>
-
-              <div style={{ background: "var(--paper)", border: "1px solid var(--rule)", borderRadius: 8, padding: "clamp(24px,3.5vw,40px)", textAlign: "left" }}>
-                <p style={{ ...bandTitle, margin: 0 }}>Priority Care</p>
-                <p style={{ ...bandSub, margin: "1em 0 0", maxWidth: "none" }}>
-                  For businesses that depend on rapid response and continuous momentum.
-                </p>
-                <div style={{ paddingTop: "1.5em", display: "grid", gap: "calc(12px * var(--pace))", maxWidth: "none" }}>
-                  <p style={{ ...bandItem, fontWeight: 500, whiteSpace: "nowrap" }}>Everything in Standard Care, plus:</p>
-                  <p style={{ ...bandItem, whiteSpace: "nowrap" }}><span style={{ marginRight: "0.5em" }}>›</span>Same-business-day response</p>
-                  <p style={{ ...bandItem, whiteSpace: "nowrap" }}><span style={{ marginRight: "0.5em" }}>›</span>Priority implementation queue</p>
-                  <p style={{ ...bandItem, whiteSpace: "nowrap" }}><span style={{ marginRight: "0.5em" }}>›</span>4 hours of implementation each month</p>
-                </div>
-                <p style={{ margin: "calc(40px * var(--pace)) 0 0", fontFamily: serif, fontSize: "clamp(1.3rem,1.8vw,1.6rem)", letterSpacing: "0.01em", color: "var(--ink)" }}>
-                  $1,000/month
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 06 — The Door */}
+      {/* 04 — The Door */}
       <section
-        data-screen-label="06 The Door"
+        data-screen-label="04 The Door"
         style={{ background: "var(--room-bg)", color: "var(--room-fg)", scrollSnapAlign: "start", minHeight: "100vh" }}
       >
         <div style={sectionGrid(180, 190)}>
-          <div style={numeral("1.4em", "var(--room-muted)")}>06</div>
+          <div style={numeral("1.4em", "var(--room-muted)")}>04</div>
           <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: "clamp(48px,6vw,96px)", alignItems: "start" }}>
             <div>
               <h2
                 style={{
-                  margin: "0 0 calc(48px * var(--pace))",
+                  margin: "0 0 calc(20px * var(--pace))",
                   fontFamily: serif,
                   fontWeight: 400,
                   fontSize: "clamp(1.7rem,3.2vw,2.8rem)",
@@ -503,15 +314,23 @@ export default function Home() {
                   color: "var(--room-fg)",
                 }}
               >
-                The best partnerships start with these four things.
+              Before we begin...
               </h2>
+              <p
+                style={{
+                  ...bodyMd,
+                  margin: "0 0 calc(24px * var(--pace))",
+                  color: "var(--room-muted)",
+                  fontStyle: "italic",
+                }}
+              >
+                There are a few things the best partnerships have in common.
+              </p>
               <div style={{ borderTop: "1px solid var(--room-rule)" }}>
-                <p style={fitItem}>Someone can name the concern.</p>
-                <p style={fitItem}>Someone can make the decision.</p>
-                <p style={fitItem}>We can see how the business actually works.</p>
-                <p style={fitItem}>
-                  You&apos;re willing to have what we learn written down.
-                </p>
+                <p style={fitItem}><span style={{ marginRight: "0.5em" }}>›</span>The decision-maker is in the room.</p>
+                <p style={fitItem}><span style={{ marginRight: "0.5em" }}>›</span>We're allowed to understand your business and processes.</p>
+                <p style={fitItem}><span style={{ marginRight: "0.5em" }}>›</span>Assumptions can be challenged.</p>
+                <p style={fitItem}><span style={{ marginRight: "0.5em" }}>›</span>Evidence matters more than ego.</p>
               </div>
             </div>
             <div>
@@ -527,7 +346,7 @@ export default function Home() {
                   textWrap: "balance",
                 }}
               >
-              Bring your toughest problem.
+              Let's begin with a conversation.
               </h2>
               <p
                 style={{
@@ -537,20 +356,10 @@ export default function Home() {
                   color: "var(--room-muted)",
                 }}
               >
-                One conversation. No cost or proposal waiting at the end of it.
-                You tell us what&apos;s happening. We ask questions. Then we tell
-                you what we think, including if we&apos;re the wrong people.
-              </p>
-              <p
-                style={{
-                  ...bodyLg,
-                  margin: "1.6em 0 0",
-                  maxWidth: "48ch",
-                  color: "var(--rule)",
-                  textWrap: undefined,
-                }}
-              >
-                If it goes further, the next step is a Diagnosis.
+                You tell us what's happening.<br></br>
+                We'll ask questions.<br></br>
+                Then we'll tell you what we think.<br></br>
+                If we're the wrong people, we'll say so.
               </p>
               <Link
                 href="/conversation"
@@ -569,7 +378,7 @@ export default function Home() {
                   color: "var(--room-fg)",
                 }}
               >
-                <span>Begin a conversation</span>
+                <span>Tell us what's happening</span>
                 <span
                   style={{
                     fontFamily: "'Archivo Narrow',sans-serif",

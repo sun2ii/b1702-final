@@ -50,6 +50,7 @@ export default function ConversationPage() {
         color: "var(--ink)",
         overflowX: "hidden",
         minHeight: "100vh",
+        paddingBottom: 80,
       }}
     >
       <SiteHeader />
@@ -158,7 +159,7 @@ export default function ConversationPage() {
         </div>
       </section>
 
-      <SiteFooter cta={{ href: "/", label: "Homepage" }} borderTop />
+      <SiteFooter cta={{ href: "/", label: "Homepage" }} />
     </div>
   );
 }
