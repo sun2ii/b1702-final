@@ -33,7 +33,9 @@
    ============================================================ */
 :root {
   --pace: 1;
-  --theme-fade: 2s; /* theme cross-fade duration, both directions */
+  --theme-fade: 0.3s; /* theme cross-fade duration */
+  --footer-height: 5.5rem;
+  --footer-clearance: 2rem;
   --paper: #F5F2EA; --muted: #ECE8DF; --ink: #141414; --graphite: #565656;
   --faint: #6E6E6E; --rule: #CFC8BC; --sig: #2F2348; --sig-text: #2F2348; --sel: #E4DFD2;
   --room-bg: #1A1A22; --room-fg: #F5F2EA; --room-muted: #CFC8BC; --room-rule: #F5F2EA;
@@ -59,13 +61,15 @@ body {
   color: var(--ink);
 }
 
-/* Theme switch cross-fade: every colored surface is body or a section
-   (page wrappers set background via inline style on divs that inherit
-   from these), so this is the whole set — no global * transition. */
+/* Theme switch cross-fade */
 body,
 body > div,
-section {
-  transition: background-color var(--theme-fade) ease;
+section,
+header,
+main,
+footer,
+[style*="background"] {
+  transition: background-color var(--theme-fade) ease, color var(--theme-fade) ease;
 }
 
 a {
@@ -111,9 +115,60 @@ input:focus, textarea:focus {
    hover states win without !important — hover-affected properties
    are NOT duplicated in inline styles)
    ============================================================ */
+/* Desktop nav - hide hamburger, show links */
+.nav-desktop {
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 3vw, 44px);
+}
+.hamburger { display: none; }
+.nav-mobile { display: none; }
+
+/* Mobile nav (under 600px) - show hamburger, hide desktop links */
+@media (max-width: 600px) {
+  .nav-desktop { display: none !important; }
+  .hamburger { display: block !important; }
+  .nav-mobile { display: flex !important; }
+  .nav-mobile .nav-link,
+  .nav-mobile .nav-link-dark {
+    font-size: 18px !important;
+    letter-spacing: 0.3em !important;
+  }
+
+  /* Staggered fade-in animation for menu items */
+  @keyframes menuFadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes menuFadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-10px); }
+  }
+
+  /* Opening animation - staggered down */
+  .nav-mobile-open a:nth-child(1) { animation: menuFadeIn 0.25s ease 0.05s both; }
+  .nav-mobile-open a:nth-child(2) { animation: menuFadeIn 0.25s ease 0.1s both; }
+  .nav-mobile-open a:nth-child(3) { animation: menuFadeIn 0.25s ease 0.15s both; }
+  .nav-mobile-open a:nth-child(4) { animation: menuFadeIn 0.25s ease 0.2s both; }
+  .nav-mobile-open a:nth-child(5) { animation: menuFadeIn 0.25s ease 0.25s both; }
+
+  /* Closing animation - staggered up (reverse order, same speed as open) */
+  .nav-mobile-closing a:nth-child(5) { animation: menuFadeOut 0.25s ease 0.05s both; }
+  .nav-mobile-closing a:nth-child(4) { animation: menuFadeOut 0.25s ease 0.1s both; }
+  .nav-mobile-closing a:nth-child(3) { animation: menuFadeOut 0.25s ease 0.15s both; }
+  .nav-mobile-closing a:nth-child(2) { animation: menuFadeOut 0.25s ease 0.2s both; }
+  .nav-mobile-closing a:nth-child(1) { animation: menuFadeOut 0.25s ease 0.25s both; }
+
+  /* Hamburger icon transition */
+  .hamburger svg {
+    transition: transform 0.2s ease;
+  }
+}
+
 .nav-link {
-  font-size: 11px;
-  letter-spacing: 0.2em;
+  font-size: 13px;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--graphite);
   padding-bottom: 3px;
@@ -183,9 +238,65 @@ input:focus, textarea:focus {
   padding-bottom: 4px;
   border-bottom: 1px solid var(--rule);
   align-self: start;
-  transition: border-bottom-color 150ms linear;
+  transition: border-bottom-color 150ms linear, color 150ms linear;
 }
 .foot-cta:hover { border-bottom-color: var(--ink); }
+
+.foot-cta-dark {
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: var(--room-muted);
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--room-rule);
+  align-self: start;
+  transition: border-bottom-color 150ms linear, color 150ms linear;
+}
+.foot-cta-dark:hover { color: var(--room-fg); border-bottom-color: var(--room-fg); }
+
+/* Nav links for dark section backgrounds */
+.nav-link-dark {
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--room-muted);
+  padding-bottom: 3px;
+  border-bottom: 1px solid transparent;
+  transition: color 150ms linear, border-bottom-color 150ms linear;
+}
+.nav-link-dark:hover { color: var(--room-fg); border-bottom-color: var(--room-fg); }
+
+/* Theme toggle inverted for dark sections */
+.sun-moon-inverted { color: var(--room-muted); }
+.sun-moon-inverted:hover { color: var(--room-fg); }
+
+/* Section edge blur for video transitions */
+section[data-screen-label]::before,
+section[data-screen-label]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 4vh;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+section[data-screen-label]::before {
+  top: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0) 100%);
+}
+
+section[data-screen-label]::after {
+  bottom: 0;
+  background: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0) 100%);
+}
+
+section.section-blur::before,
+section.section-blur::after {
+  opacity: 1;
+}
 
 /* ============================================================
    Responsive collapses (matching the template's breakpoints)
@@ -193,4 +304,67 @@ input:focus, textarea:focus {
 @media (max-width: 900px) {
   [data-after="1"], [data-after="2"], [data-principle] { margin-left: 0 !important; }
   [data-band] { grid-template-columns: minmax(0, 1fr) !important; }
+}
+
+@media (max-width: 768px) {
+  .hide-on-mobile { display: none !important; }
+
+  /* Sections 02, 03, 04 - hide numeral, single column, center content */
+  section[data-screen-label="02 The Named Thing"] > div,
+  section[data-screen-label="03 The Sequence"] > div,
+  section[data-screen-label="04 The Door"] > div {
+    grid-template-columns: 1fr !important;
+  }
+  section[data-screen-label="02 The Named Thing"] > div > div:first-child,
+  section[data-screen-label="03 The Sequence"] > div > div:first-child,
+  section[data-screen-label="04 The Door"] > div > div:first-child {
+    display: none !important;
+  }
+  section[data-screen-label="03 The Sequence"] > div > div:last-child,
+  section[data-screen-label="04 The Door"] > div > div:last-child {
+    grid-template-columns: 1fr !important;
+    text-align: center;
+    justify-items: center;
+  }
+
+  /* Section 02 - vertically center content on the page */
+  section[data-screen-label="02 The Named Thing"] > div {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 100vh !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  section[data-screen-label="02 The Named Thing"] > div > div:last-child {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3.5rem !important;
+    max-width: 500px !important;
+  }
+  /* Title centered */
+  section[data-screen-label="02 The Named Thing"] > div > div:last-child > h2 {
+    text-align: center !important;
+  }
+  /* Body text left-aligned */
+  section[data-screen-label="02 The Named Thing"] > div > div:last-child > div {
+    text-align: left !important;
+  }
+
+  /* Section 04 - vertically center content, left align the checklist items */
+  section[data-screen-label="04 The Door"] > div {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 100vh !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  section[data-screen-label="04 The Door"] > div > div:last-child {
+    text-align: left !important;
+    justify-items: stretch !important;
+    max-width: 500px !important;
+  }
 }

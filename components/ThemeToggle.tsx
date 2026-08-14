@@ -5,7 +5,9 @@
    so server and client always render the same markup.
    Icons: Tabler `sun` (light mode) and Tabler `shadow` (dark mode) —
    both stroke-based on the same center circle, colored via currentColor. */
-export default function ThemeToggle() {
+type Props = { isDark?: boolean };
+
+export default function ThemeToggle({ isDark }: Props) {
   const toggle = () => {
     const dark = document.documentElement.classList.toggle("theme-dark");
     try {
@@ -18,7 +20,7 @@ export default function ThemeToggle() {
   return (
     <button
       type="button"
-      className="sun-moon"
+      className={isDark ? "sun-moon sun-moon-inverted" : "sun-moon"}
       onClick={toggle}
       aria-label="Toggle light and dark mode"
       title="Toggle light and dark mode"

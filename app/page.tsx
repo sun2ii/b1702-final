@@ -2,9 +2,15 @@
 
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import TypeWriter from "@/components/TypeWriter";
+import VideoBackground from "@/components/VideoBackground";
+import WelcomeModal from "@/components/WelcomeModal";
+import { useAudioContext } from "@/components/AudioProvider";
+import { useActiveSection } from "@/hooks/useActiveSection";
+import { useSectionNavigation } from "@/hooks/useSectionNavigation";
 
 /* ------------------------------------------------------------------
    Style primitives — the invariant structures every section reuses.
@@ -82,91 +88,192 @@ const fitItem: CSSProperties = {
 };
 
 export default function Home() {
+  const [introComplete, setIntroComplete] = useState(false);
+  const [introStarted, setIntroStarted] = useState(false);
+  const activeSection = useActiveSection();
+  const { hasEntered, skippedModal, enter, playTypewriter, stopTypewriterAndPlayMusic } = useAudioContext();
+
+  // Auto-start typewriter sequence if modal was skipped (returning visitor)
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    if (skippedModal && !introStarted) {
+      setIntroStarted(true);
+      playTypewriter();
+    }
+  }, [skippedModal, introStarted, playTypewriter]);
 
-      e.preventDefault();
+  const handleEnter = () => {
+    enter();
+    setIntroStarted(true);
+    playTypewriter();
+  };
 
-      const sections = document.querySelectorAll('section[data-screen-label]');
-      let currentSection = -1;
+  const handleIntroComplete = () => {
+    setIntroComplete(true);
+    stopTypewriterAndPlayMusic();
+  };
 
-      // Find which section is currently most visible
-      sections.forEach((section, index) => {
-        const rect = section.getBoundingClientRect();
-        // If section top is within the top 30% of viewport, it's the current one
-        if (rect.top >= -100 && rect.top < window.innerHeight * 0.3) {
-          currentSection = index;
-        }
-      });
-
-      // If no section found at top, find first visible one
-      if (currentSection === -1) {
-        sections.forEach((section, index) => {
-          const rect = section.getBoundingClientRect();
-          if (rect.top < window.innerHeight && rect.bottom > 0) {
-            currentSection = index;
-          }
-        });
-      }
-
-      if (e.key === 'ArrowDown' && currentSection < sections.length - 1) {
-        sections[currentSection + 1].scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else if (e.key === 'ArrowUp' && currentSection > 0) {
-        sections[currentSection - 1].scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  // Arrow key navigation between sections
+  useSectionNavigation();
 
   return (
     <div
       style={{
-        background: "var(--paper)",
+        background: introComplete ? "var(--paper)" : "#000",
         fontFamily: "'Archivo Narrow',system-ui,sans-serif",
         fontWeight: 400,
         color: "var(--ink)",
         overflowX: "hidden",
         minHeight: "100vh",
         scrollSnapType: "y mandatory",
-        overflowY: "scroll",
+        overflowY: introComplete ? "scroll" : "hidden",
         height: "100vh",
+        transition: "background 2.5s ease-out",
       }}
     >
-      <SiteHeader />
+      <SiteHeader introComplete={introComplete} />
 
       {/* 01 — Threshold */}
-      <section data-screen-label="01 Threshold" style={{ ...sectionGrid(190, 210), scrollSnapAlign: "start" }}>
-        <div style={numeral("1.1em")}>01</div>
-        <div>
-          <h1
+      <section
+        data-screen-label="01 Threshold"
+        data-theme="dark"
+                style={{
+          position: "relative",
+          scrollSnapAlign: "start",
+          height: "100dvh",
+          boxSizing: "border-box",
+          overflow: "hidden",
+        }}
+      >
+        {/* Video background */}
+        <VideoBackground
+          src="/movies/homepage/desktop/01-cityscapes.webm"
+          mobileSrc="/movies/homepage/mobile/01-cityscapes.webm"
+          poster="/poster/cityscape.png"
+          paused={!introComplete || activeSection !== "01 Threshold"}
+          fadeInOnStart
+        />
+
+        {/* Dark overlay */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: introComplete ? "rgba(0,0,0,0.35)" : "rgba(0,0,0,1)",
+            zIndex: 1,
+            transition: "background 2.5s ease-out",
+          }}
+        />
+
+        {/* Content */}
+        <div
+          style={{
+            position: "relative",
+            zIndex: 2,
+            maxWidth: 1320,
+            margin: "0 auto",
+            padding: "calc(190px * var(--pace)) clamp(24px,5.5vw,96px) calc(var(--footer-height) + var(--footer-clearance))",
+            display: "grid",
+            gridTemplateColumns: "minmax(0,10ch) minmax(0,1fr)",
+            gap: "clamp(16px,4vw,48px)",
+            height: "100%",
+            boxSizing: "border-box",
+          }}
+        >
+          <div
             style={{
-              margin: 0,
-              fontFamily: serif,
-              fontWeight: 400,
-              fontSize: "clamp(3rem,9.6vw,9.4rem)",
-              lineHeight: 0.98,
-              letterSpacing: "-0.022em",
-              maxWidth: "15ch",
-              textWrap: "balance",
+              ...numeral("1.1em", "rgba(255,255,255,0.6)"),
+              opacity: introComplete ? 1 : 0,
+              transition: "opacity 2.5s ease-out 0.5s",
             }}
           >
-          Let's begin with clarity.
-          </h1>
-          <div style={{ height: "calc(230px * var(--pace))" }} />
-          <p style={{ ...bodyLg, maxWidth: "42ch", fontSize: "clamp(1.5rem,1.4vw,1.38rem)" }}>
-          Complex decisions deserves clear thinking.
-          Everything else, follows.
-          </p>
+            01
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+            <h1
+              style={{
+                margin: 0,
+                fontFamily: serif,
+                fontWeight: 400,
+                fontSize: "clamp(3rem,9.6vw,9.4rem)",
+                lineHeight: 0.98,
+                letterSpacing: "-0.022em",
+                whiteSpace: "nowrap",
+                color: "#F5F2EA",
+              }}
+            >
+              <TypeWriter
+                segments={[
+                  { text: "Let's begin", pauseBlinks: 3.5 },
+                  { text: "\nwith clarity.", pauseBlinks: 0 },
+                ]}
+                speed={70}
+                delay={1500}
+                start={introStarted}
+                onComplete={handleIntroComplete}
+              />
+            </h1>
+            <p
+              style={{
+                ...bodyLg,
+                maxWidth: "42ch",
+                fontSize: "clamp(1.5rem,1.4vw,1.38rem)",
+                marginTop: "auto",
+                color: "rgba(255,255,255,0.8)",
+                opacity: introComplete ? 1 : 0,
+                transition: "opacity 2.5s ease-out 0.5s",
+              }}
+            >
+            Complex decisions deserve clear thinking.
+            Everything else follows.
+            </p>
+          </div>
         </div>
       </section>
 
       {/* 02 — The Named Thing */}
-      <section data-screen-label="02 The Named Thing" style={{ background: "var(--muted)", scrollSnapAlign: "start", minHeight: "100vh" }}>
-        <div style={sectionGrid(96, 110)}>
-          <div style={numeral("0.9em")}>02</div>
+      <section
+        data-screen-label="02 The Named Thing"
+        data-theme="dark"
+                style={{
+          position: "relative",
+          scrollSnapAlign: "start",
+          minHeight: "100vh",
+          overflow: "hidden",
+        }}
+      >
+        {/* Video background */}
+        <VideoBackground
+          src="/movies/homepage/desktop/02-architectural.webm"
+          mobileSrc="/movies/homepage/mobile/02-architectural.webm"
+          poster="/poster/architecture.png"
+          paused={activeSection !== "02 The Named Thing"}
+        />
+
+        {/* Dark overlay */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.5)",
+            zIndex: 1,
+          }}
+        />
+
+        {/* Content */}
+        <div
+          style={{
+            ...sectionGrid(96, 110),
+            position: "relative",
+            zIndex: 2,
+          }}
+        >
+          <div style={numeral("0.9em", "rgba(255,255,255,0.6)")}>02</div>
           <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: "clamp(32px,5vw,80px)", alignItems: "center" }}>
             <h2
               style={{
@@ -178,22 +285,26 @@ export default function Home() {
                 letterSpacing: "-0.018em",
                 maxWidth: "16ch",
                 textWrap: "balance",
+                color: "#F5F2EA",
               }}
             >
               Most work fails before it begins.
             </h2>
             <div>
-              <p style={{ ...bodyLg, margin: 0 }}>
+              <p style={{ ...bodyLg, margin: 0, color: "rgba(255,255,255,0.8)" }}>
                 Technology rarely fails. Decisions do.
               </p>
-              <p style={{ ...bodyLg, margin: "1.5em 0 0" }}>
+              <p style={{ ...bodyLg, margin: "1.5em 0 0", color: "rgba(255,255,255,0.8)" }}>
                 Most technology is built to answer the wrong question.<br></br>
                 Perfectly executed.
-                Beautifully designed.
-                Entirely unnecessary.
+                Beautifully designed.<br></br>
+                But entirely unnecessary.
               </p>
-              <p style={{ ...bodyLg, margin: "1.5em 0 0", color: "var(--ink)" }}>
-                We think the decision deserves more attention than the implementation. That's where we come in.
+              <p style={{ ...bodyLg, margin: "1.5em 0 0", color: "#F5F2EA" }}>
+                We think the decision deserves more attention than the implementation.
+              </p>
+              <p style={{ ...bodyLg, margin: "1.5em 0 0", color: "#F5F2EA" }}>
+                And that&apos;s where we come in.
               </p>
             </div>
           </div>
@@ -201,13 +312,50 @@ export default function Home() {
       </section>
 
       {/* 03 — The Sequence */}
-      <section data-screen-label="03 The Sequence" style={{ background: "var(--paper)", scrollSnapAlign: "start", minHeight: "100vh" }}>
-        <div style={sectionGrid(120, 150)}>
-          <div style={numeral("0.6em")}>03</div>
-          <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: "clamp(32px,5vw,80px)", alignItems: "center" }}>
+      <section
+        data-screen-label="03 The Sequence"
+        data-theme="dark"
+                style={{
+          position: "relative",
+          scrollSnapAlign: "start",
+          minHeight: "100vh",
+          overflow: "hidden",
+        }}
+      >
+        {/* Video background */}
+        <VideoBackground
+          src="/movies/homepage/desktop/03-diagnosis.webm"
+          mobileSrc="/movies/homepage/mobile/03-diagnosis.webm"
+          poster="/poster/diagnosis.png"
+          paused={activeSection !== "03 The Sequence"}
+        />
+
+        {/* Dark overlay */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.5)",
+            zIndex: 1,
+          }}
+        />
+
+        {/* Content */}
+        <div
+          style={{
+            ...sectionGrid(120, 150),
+            position: "relative",
+            zIndex: 2,
+          }}
+        >
+          <div style={numeral("0.6em", "rgba(255,255,255,0.6)")}>03</div>
+          <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: "clamp(80px,10vw,160px)", alignItems: "center" }}>
             <div>
-              <a
-                href="#"
+              <Link
+                href="/services/diagnose"
                 className="rule-link"
                 style={{
                   display: "inline-block",
@@ -216,22 +364,23 @@ export default function Home() {
                   lineHeight: 0.96,
                   letterSpacing: "-0.024em",
                   whiteSpace: "nowrap",
+                  color: "#F5F2EA",
                 }}
               >
-                Diagnosis
-              </a>
+                Diagnose
+              </Link>
 
               <p
                 style={{
                   margin: "calc(20px * var(--pace)) 0 0",
                   fontSize: 18,
-                  fontWeight: 500,
+                  fontWeight: 900,
                   letterSpacing: "0.2em",
                   textTransform: "uppercase",
-                  color: "var(--sig-text)",
+                  color: "#C4B08A",
                 }}
               >
-                From $5,000
+                Starting: $5,000
               </p>
 
               <p
@@ -243,13 +392,14 @@ export default function Home() {
                   lineHeight: 1.16,
                   letterSpacing: "-0.016em",
                   textWrap: "balance",
+                  color: "#F5F2EA",
                 }}
               >
                 Every engagement starts here.
               </p>
 
-              <p style={{ ...bodyMd, margin: "calc(40px * var(--pace)) 0 0", maxWidth: "42ch" }}>
-              We understand the business before changing it.
+              <p style={{ ...bodyMd, margin: "calc(40px * var(--pace)) 0 0", maxWidth: "42ch", color: "rgba(255,255,255,0.8)" }}>
+              Before we change the business, we understand it.
               </p>
 
               <p
@@ -263,28 +413,51 @@ export default function Home() {
                   lineHeight: 1.34,
                   letterSpacing: "-0.008em",
                   textWrap: "pretty",
+                  color: "rgba(255,255,255,0.8)",
                 }}
               >
                 Sometimes the answer is that nothing should be built.
               </p>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "calc(36px * var(--pace))" }}>
-              <div style={{ paddingTop: "calc(34px * var(--pace))" }}>
-                <a href="#" className="rule-link" style={seqRowLink}>
-                  Build
-                </a>
-                <p style={{ ...seqRowText, margin: "0.8em 0 0" }}>
-                Tailored after Diagnosis.
+            <div className="hide-on-mobile" style={{ display: "flex", flexDirection: "column", gap: "calc(36px * var(--pace))" }}>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 20,
+                  fontWeight: 400,
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                  textAlign: "center",
+                  color: "rgba(255,255,255,0.8)",
+                }}
+              >
+                Core Services
+              </p>
+              <div style={{ paddingTop: "calc(10px * var(--pace))" }}>
+                <Link href="/services/build" className="rule-link" style={{ ...seqRowLink, color: "#F5F2EA" }}>
+                  01. Build
+                </Link>
+                <p style={{ margin: "0.8em 0 0", color: "rgba(255,255,255,0.8)" }}>
+                When something needs to be made.
                 </p>
               </div>
 
-              <div style={{ borderTop: "1px solid var(--rule)", paddingTop: "calc(34px * var(--pace))" }}>
-                <a href="#" className="rule-link" style={seqRowLink}>
-                  Care
-                </a>
-                <p style={{ ...seqRowText, margin: "0.8em 0 0" }}>
-                From $500/month.
+              <div style={{ borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: "calc(34px * var(--pace))" }}>
+                <Link href="/services/care" className="rule-link" style={{ ...seqRowLink, color: "#F5F2EA" }}>
+                  02. Care
+                </Link>
+                <p style={{ margin: "0.8em 0 0", color: "rgba(255,255,255,0.8)" }}>
+                When something needs to be maintained.
+                </p>
+              </div>
+
+              <div style={{ borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: "calc(34px * var(--pace))" }}>
+                <Link href="/services/grow" className="rule-link" style={{ ...seqRowLink, color: "#F5F2EA" }}>
+                  03. Grow
+                </Link>
+                <p style={{ margin: "0.8em 0 0", color: "rgba(255,255,255,0.8)" }}>
+                  When something needs to reach more people.
                 </p>
               </div>
             </div>
@@ -295,10 +468,46 @@ export default function Home() {
       {/* 04 — The Door */}
       <section
         data-screen-label="04 The Door"
-        style={{ background: "var(--room-bg)", color: "var(--room-fg)", scrollSnapAlign: "start", minHeight: "100vh" }}
+        data-theme="dark"
+        style={{
+          position: "relative",
+          scrollSnapAlign: "start",
+          height: "100vh",
+          overflow: "hidden",
+          boxSizing: "border-box",
+        }}
       >
-        <div style={sectionGrid(180, 190)}>
-          <div style={numeral("1.4em", "var(--room-muted)")}>04</div>
+        {/* Video background */}
+        <VideoBackground
+          src="/movies/homepage/desktop/04-conversation.webm"
+          mobileSrc="/movies/homepage/mobile/04-conversation.webm"
+          poster="/poster/coffee.png"
+          paused={activeSection !== "04 The Door"}
+        />
+
+        {/* Dark overlay */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.5)",
+            zIndex: 1,
+          }}
+        />
+
+        {/* Content */}
+        <div
+          style={{
+            ...sectionGrid(140, 0),
+            position: "relative",
+            paddingBottom: "calc(var(--footer-height) + var(--footer-clearance))",
+            zIndex: 2,
+          }}
+        >
+          <div style={numeral("1.4em", "rgba(255,255,255,0.6)")}>04</div>
           <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)", gap: "clamp(48px,6vw,96px)", alignItems: "start" }}>
             <div>
               <h2
@@ -311,7 +520,7 @@ export default function Home() {
                   letterSpacing: "-0.016em",
                   maxWidth: "20ch",
                   textWrap: "balance",
-                  color: "var(--room-fg)",
+                  color: "#F5F2EA",
                 }}
               >
               Before we begin...
@@ -320,20 +529,20 @@ export default function Home() {
                 style={{
                   ...bodyMd,
                   margin: "0 0 calc(24px * var(--pace))",
-                  color: "var(--room-muted)",
+                  color: "rgba(255,255,255,0.8)",
                   fontStyle: "italic",
                 }}
               >
                 There are a few things the best partnerships have in common.
               </p>
-              <div style={{ borderTop: "1px solid var(--room-rule)" }}>
-                <p style={fitItem}><span style={{ marginRight: "0.5em" }}>›</span>The decision-maker is in the room.</p>
-                <p style={fitItem}><span style={{ marginRight: "0.5em" }}>›</span>We're allowed to understand your business and processes.</p>
-                <p style={fitItem}><span style={{ marginRight: "0.5em" }}>›</span>Assumptions can be challenged.</p>
-                <p style={fitItem}><span style={{ marginRight: "0.5em" }}>›</span>Evidence matters more than ego.</p>
+              <div style={{ borderTop: "1px solid rgba(255,255,255,0.3)" }}>
+                <p style={{ ...fitItem, borderBottomColor: "rgba(255,255,255,0.2)" }}><span style={{ marginRight: "0.5em" }}>›</span>The decision-maker is in the room.</p>
+                <p style={{ ...fitItem, borderBottomColor: "rgba(255,255,255,0.2)" }}><span style={{ marginRight: "0.5em" }}>›</span>We&apos;re allowed to understand your business and processes.</p>
+                <p style={{ ...fitItem, borderBottomColor: "rgba(255,255,255,0.2)" }}><span style={{ marginRight: "0.5em" }}>›</span>Assumptions can be challenged.</p>
+                <p style={{ ...fitItem, borderBottomColor: "rgba(255,255,255,0.2)" }}><span style={{ marginRight: "0.5em" }}>›</span>Evidence matters more than ego.</p>
               </div>
             </div>
-            <div>
+            <div className="hide-on-mobile">
               <h2
                 style={{
                   margin: 0,
@@ -344,25 +553,26 @@ export default function Home() {
                   letterSpacing: "-0.018em",
                   maxWidth: "13ch",
                   textWrap: "balance",
+                  color: "#F5F2EA",
                 }}
               >
-              Let's begin with a conversation.
+              Enough browsing.
               </h2>
               <p
                 style={{
                   ...bodyLg,
                   margin: "calc(60px * var(--pace)) 0 0",
                   maxWidth: "48ch",
-                  color: "var(--room-muted)",
+                  color: "rgba(255,255,255,0.8)",
                 }}
               >
-                You tell us what's happening.<br></br>
-                We'll ask questions.<br></br>
-                Then we'll tell you what we think.<br></br>
-                If we're the wrong people, we'll say so.
+                You tell us what&apos;s happening.<br></br>
+                We&apos;ll ask the questions.<br></br>
+                And we&apos;ll tell you what we think.<br></br>
+                If we&apos;re not a good fit, we&apos;ll say so.
               </p>
               <Link
-                href="/conversation"
+                href="/start-here"
                 className="cta-link"
                 style={{
                   display: "inline-flex",
@@ -370,15 +580,15 @@ export default function Home() {
                   gap: "0.8em",
                   marginTop: "calc(60px * var(--pace))",
                   paddingBottom: 14,
-                  borderBottom: "1px solid var(--room-rule)",
+                  borderBottom: "1px solid rgba(255,255,255,0.3)",
                   fontFamily: "'Archivo Narrow',sans-serif",
                   fontWeight: 500,
                   fontSize: "clamp(1.15rem,1.5vw,1.4rem)",
                   letterSpacing: "0.02em",
-                  color: "var(--room-fg)",
+                  color: "#F5F2EA",
                 }}
               >
-                <span>Tell us what's happening</span>
+                <span>Let's Talk</span>
                 <span
                   style={{
                     fontFamily: "'Archivo Narrow',sans-serif",
@@ -394,7 +604,9 @@ export default function Home() {
         </div>
       </section>
 
-      <SiteFooter cta={{ href: "/conversation", label: "Begin a conversation" }} />
+      <SiteFooter introComplete={introComplete} />
+
+      {!hasEntered && <WelcomeModal onEnter={handleEnter} />}
     </div>
   );
 }

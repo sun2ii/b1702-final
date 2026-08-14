@@ -2,7 +2,7 @@
 
 import { useState, type CSSProperties, type FormEvent } from "react";
 
-const field: CSSProperties = { display: "grid", gap: 10 };
+const field: CSSProperties = { display: "grid", gap: 4 };
 
 const fieldLabel: CSSProperties = {
   fontSize: 11,
@@ -15,25 +15,48 @@ const fieldInput: CSSProperties = {
   background: "transparent",
   border: 0,
   borderBottom: "1px solid var(--rule)",
-  padding: "10px 0 12px",
-  fontSize: "clamp(1.1rem,1.32vw,1.3rem)",
-  lineHeight: 1.44,
+  padding: "4px 0 6px",
+  fontSize: "clamp(1rem,1.2vw,1.15rem)",
+  lineHeight: 1.4,
   letterSpacing: "0.004em",
   borderRadius: 0,
   transition: "border-bottom-color 150ms linear",
 };
 
 export default function ConversationForm() {
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
-  function submit(e: FormEvent<HTMLFormElement>) {
+  async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // TODO: wire to a server action / email service. For now the form
-    // only flips to the confirmation state, matching the template.
-    setSent(true);
+    setStatus("sending");
+
+    const form = e.currentTarget;
+    const data = {
+      name: (form.elements.namedItem("name") as HTMLInputElement).value,
+      business: (form.elements.namedItem("business") as HTMLInputElement).value,
+      email: (form.elements.namedItem("email") as HTMLInputElement).value,
+      concern: (form.elements.namedItem("concern") as HTMLTextAreaElement).value,
+      decider: (form.elements.namedItem("decider") as HTMLInputElement).value,
+    };
+
+    try {
+      const res = await fetch("/api/conversation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (res.ok) {
+        setStatus("sent");
+      } else {
+        setStatus("error");
+      }
+    } catch {
+      setStatus("error");
+    }
   }
 
-  if (sent) {
+  if (status === "sent") {
     return (
       <div style={{ maxWidth: "44ch" }}>
         <p
@@ -66,12 +89,46 @@ export default function ConversationForm() {
     );
   }
 
+  if (status === "error") {
+    return (
+      <div style={{ maxWidth: "44ch" }}>
+        <p
+          style={{
+            margin: 0,
+            fontFamily: "'Playfair Display',Georgia,serif",
+            fontSize: "clamp(1.5rem,2.4vw,2.05rem)",
+            lineHeight: 1.26,
+            letterSpacing: "-0.012em",
+            color: "var(--ink)",
+          }}
+        >
+          Something went wrong.
+        </p>
+        <p
+          style={{
+            margin: "1.6em 0 0",
+            fontSize: "clamp(1.1rem,1.32vw,1.3rem)",
+            lineHeight: 1.72,
+            letterSpacing: "0.004em",
+            color: "var(--graphite)",
+            textWrap: "pretty",
+          }}
+        >
+          Please email us directly at{" "}
+          <a href="mailto:ben@binary1702.com" style={{ color: "var(--sig-text)" }}>
+            ben@binary1702.com
+          </a>
+        </p>
+      </div>
+    );
+  }
+
   return (
     <form
       onSubmit={submit}
       style={{
         display: "grid",
-        gap: "calc(40px * var(--pace))",
+        gap: 16,
         maxWidth: "46ch",
       }}
     >
@@ -94,7 +151,7 @@ export default function ConversationForm() {
         <span style={fieldLabel}>What&apos;s happening</span>
         <textarea
           name="concern"
-          rows={5}
+          rows={3}
           required
           style={{ ...fieldInput, lineHeight: 1.62, resize: "none" }}
         />
@@ -108,9 +165,10 @@ export default function ConversationForm() {
         <input type="text" name="decider" style={fieldInput} />
       </label>
 
-      <div style={{ marginTop: "calc(24px * var(--pace))" }}>
+      <div style={{ marginTop: 12 }}>
         <button
           type="submit"
+          disabled={status === "sending"}
           className="cta-link"
           style={{
             background: "transparent",
@@ -121,10 +179,11 @@ export default function ConversationForm() {
             fontWeight: 500,
             fontSize: "clamp(1.1rem,1.4vw,1.3rem)",
             letterSpacing: "0.02em",
-            cursor: "pointer",
+            cursor: status === "sending" ? "wait" : "pointer",
+            opacity: status === "sending" ? 0.6 : 1,
           }}
         >
-          Send this
+          {status === "sending" ? "Sending..." : "Send this"}
         </button>
       </div>
     </form>

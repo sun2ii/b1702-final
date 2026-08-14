@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AudioProvider } from "@/components/AudioProvider";
+import GlobalMuteButton from "@/components/GlobalMuteButton";
 
 export const metadata: Metadata = {
   title: "Binary1702",
@@ -18,7 +20,10 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem("theme");if(t==="dark"||(!t&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("theme-dark")}catch(e){}})()`,
           }}
         />
-        {children}
+        <AudioProvider>
+          {children}
+          <GlobalMuteButton />
+        </AudioProvider>
       </body>
     </html>
   );
