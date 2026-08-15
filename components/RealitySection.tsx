@@ -410,7 +410,7 @@ export default function RealitySection() {
           zIndex: 2,
           maxWidth: 1320,
           margin: "0 auto",
-          padding: "clamp(100px, 18vh, 140px) clamp(20px, 5vw, 32px) 80px",
+          padding: "clamp(120px, 20vh, 160px) clamp(20px, 5vw, 32px) clamp(80px, 12vh, 120px)",
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
@@ -434,33 +434,6 @@ export default function RealitySection() {
 
         {/* Left column: text content */}
         <div style={{ paddingTop: isMobile ? 0 : 20 }}>
-          {/* Mobile chapter label */}
-          {isMobile && (
-            <div style={{ marginBottom: 12 }}>
-              <span
-                style={{
-                  fontSize: 13,
-                  fontWeight: 600,
-                  letterSpacing: "0.15em",
-                  color: "rgba(255,255,255,0.5)",
-                }}
-              >
-                03
-              </span>
-              <span
-                style={{
-                  fontSize: 13,
-                  fontWeight: 600,
-                  letterSpacing: "0.15em",
-                  textTransform: "uppercase",
-                  color: "rgba(255,255,255,0.5)",
-                  marginLeft: 16,
-                }}
-              >
-                The Reality
-              </span>
-            </div>
-          )}
           {/* Main heading */}
           <h2
             className="reality-fade"
@@ -552,16 +525,18 @@ export default function RealitySection() {
           >
             Synthesis over silos.
           </p>
+
         </div>
 
-        {/* Right column: diagram */}
+        {/* Right column: diagram - hidden on mobile */}
+        {!isMobile && (
         <div
           ref={mapRef}
           style={{
             position: "relative",
             width: "100%",
-            height: isMobile ? "clamp(280px, 45vh, 380px)" : "clamp(380px, 50vh, 480px)",
-            marginTop: isMobile ? "auto" : "-80px",
+            height: "clamp(380px, 50vh, 480px)",
+            marginTop: "-80px",
             flexShrink: 0,
           }}
         >
@@ -853,6 +828,7 @@ export default function RealitySection() {
               </div>
             </div>
         </div>
+        )}
       </div>
 
       <style jsx>{`

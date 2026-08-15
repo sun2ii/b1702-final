@@ -1,31 +1,48 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 type Props = {
   muted: boolean;
   onToggle: () => void;
+  hidden?: boolean;
 };
 
-export default function MuteButton({ muted, onToggle }: Props) {
+export default function MuteButton({ muted, onToggle, hidden = false }: Props) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   return (
     <button
       onClick={onToggle}
       aria-label={muted ? "Unmute" : "Mute"}
       style={{
         position: "fixed",
-        bottom: 24,
-        left: 24,
+        // Mobile: top right next to hamburger. Desktop: bottom left
+        top: isMobile ? 10 : "auto",
+        bottom: isMobile ? "auto" : 24,
+        right: isMobile ? 68 : "auto",
+        left: isMobile ? "auto" : 24,
         zIndex: 101,
-        width: 40,
-        height: 40,
+        width: isMobile ? 44 : 40,
+        height: isMobile ? 44 : 40,
         borderRadius: "50%",
-        border: "1px solid var(--room-muted)",
-        background: "var(--room-bg)",
+        border: isMobile ? "none" : "1px solid var(--room-muted)",
+        background: isMobile ? "transparent" : "var(--room-bg)",
         color: "var(--room-muted)",
         cursor: "pointer",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        transition: "border-color 0.2s ease, color 0.2s ease",
+        transition: "border-color 0.2s ease, color 0.2s ease, opacity 0.5s ease",
+        opacity: hidden ? 0 : 1,
+        pointerEvents: hidden ? "none" : "auto",
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = "var(--room-fg)";

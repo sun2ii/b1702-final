@@ -8,6 +8,7 @@ import SiteFooter from "@/components/SiteFooter";
 import TypeWriter from "@/components/TypeWriter";
 import VideoBackground from "@/components/VideoBackground";
 import WelcomeModal from "@/components/WelcomeModal";
+import GlobalMuteButton from "@/components/GlobalMuteButton";
 import { useAudioContext } from "@/components/AudioProvider";
 import { useActiveSection } from "@/hooks/useActiveSection";
 import { useSectionNavigation } from "@/hooks/useSectionNavigation";
@@ -116,6 +117,13 @@ export default function Home() {
   const shouldPreload = useCallback((sectionId: string) => {
     return preloadSections.has(sectionId);
   }, [preloadSections]);
+
+  // Force scroll to top on initial load
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, []);
 
   // Auto-start typewriter sequence if modal was skipped (returning visitor)
   useEffect(() => {
@@ -263,7 +271,7 @@ export default function Home() {
             zIndex: 2,
             maxWidth: 1320,
             margin: "0 auto",
-            padding: "calc(190px * var(--pace)) clamp(24px,5.5vw,96px) clamp(48px, 6vw, 80px)",
+            padding: "calc(190px * var(--pace)) clamp(24px,5.5vw,96px) clamp(80px, 12vh, 120px)",
             display: "grid",
             gridTemplateColumns: "minmax(0,10ch) minmax(0,1fr)",
             gap: "clamp(16px,4vw,48px)",
@@ -311,7 +319,7 @@ export default function Home() {
                 ...bodyLg,
                 maxWidth: "42ch",
                 fontSize: "clamp(1.5rem,1.4vw,1.38rem)",
-                marginTop: "auto",
+                marginTop: "clamp(48px, 8vh, 120px)",
                 color: "rgba(255,255,255,0.8)",
                 opacity: introComplete ? 1 : 0,
                 transition: "opacity 2.5s ease-out 0.5s",
@@ -698,6 +706,8 @@ export default function Home() {
       </section>
 
       <SiteFooter introComplete={introComplete} />
+
+      <GlobalMuteButton introComplete={introComplete} />
 
       {!hasEntered && <WelcomeModal onEnter={handleEnter} />}
     </div>

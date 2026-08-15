@@ -3,10 +3,14 @@
 import { useAudioContext } from "@/components/AudioProvider";
 import MuteButton from "@/components/MuteButton";
 
-export default function GlobalMuteButton() {
+type Props = {
+  introComplete?: boolean;
+};
+
+export default function GlobalMuteButton({ introComplete = true }: Props) {
   const { hasEntered, muted, toggleMute } = useAudioContext();
 
   if (!hasEntered) return null;
 
-  return <MuteButton muted={muted} onToggle={toggleMute} />;
+  return <MuteButton muted={muted} onToggle={toggleMute} hidden={!introComplete} />;
 }

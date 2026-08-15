@@ -11,6 +11,29 @@ export default function WelcomeModal({ onEnter }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rainPausedRef = useRef(false);
 
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (phase === "done") return;
+
+    // Save current scroll position and lock body
+    const scrollY = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      // Restore scroll position when modal closes
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.overflow = "";
+      window.scrollTo(0, scrollY);
+    };
+  }, [phase]);
+
   // Matrix rain effect
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -105,9 +128,12 @@ export default function WelcomeModal({ onEnter }: Props) {
         alignItems: "center",
         justifyContent: "center",
         gap: 32,
+        overflow: "hidden",
         pointerEvents: phase === "done" ? "none" : "auto",
         opacity: phase === "fading" || phase === "done" ? 0 : 1,
         transition: "opacity 2s ease-out",
+        touchAction: "none",
+        overscrollBehavior: "none",
       }}
     >
       {/* Matrix rain canvas */}

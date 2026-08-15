@@ -7,6 +7,7 @@ type AudioContextType = {
   skippedModal: boolean;
   muted: boolean;
   isPlaying: boolean;
+  introComplete: boolean;
   enter: () => void;
   toggleMute: () => void;
   playTypewriter: () => void;
@@ -20,6 +21,7 @@ const defaultContext: AudioContextType = {
   skippedModal: false,
   muted: false,
   isPlaying: false,
+  introComplete: false,
   enter: () => {},
   toggleMute: () => {},
   playTypewriter: () => {},
@@ -60,6 +62,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const [isClient, setIsClient] = useState(false);
   const [currentTrack, setCurrentTrack] = useState("homepage");
   const [isPlaying, setIsPlaying] = useState(false);
+  const [introComplete, setIntroComplete] = useState(false);
 
   const typewriterRef = useRef<HTMLAudioElement | null>(null);
   const musicRef = useRef<HTMLAudioElement | null>(null);
@@ -72,6 +75,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     if (alreadyEntered) {
       setSkippedModal(true);
       setHasEntered(true);
+      setIntroComplete(true); // Returning visitors skip typing
     }
 
     const savedMuted = localStorage.getItem("audio-muted") === "true";
@@ -137,6 +141,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const stopTypewriterAndPlayMusic = useCallback(() => {
+    setIntroComplete(true);
     if (typewriterRef.current) {
       typewriterRef.current.pause();
     }
@@ -208,6 +213,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       skippedModal,
       muted,
       isPlaying,
+      introComplete,
       enter,
       toggleMute,
       playTypewriter,
