@@ -48,7 +48,7 @@ export function useActiveSection(): string | null {
       });
 
       if (closestSection && closestDistance < viewportHeight * 0.3) {
-        const label = closestSection.getAttribute("data-screen-label");
+        const label = (closestSection as HTMLElement).getAttribute("data-screen-label");
         if (label) setActiveSection(label);
       }
     };

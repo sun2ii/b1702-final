@@ -2,7 +2,7 @@
 
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import TypeWriter from "@/components/TypeWriter";
@@ -87,36 +87,124 @@ const fitItem: CSSProperties = {
   textWrap: "pretty",
 };
 
+// Network speed detection for preload decisions
+function getNetworkSpeed(): "slow" | "medium" | "fast" {
+  if (typeof navigator === "undefined") return "fast";
+  const conn = (navigator as any).connection;
+  if (!conn) return "fast";
+  if (conn.saveData) return "slow";
+  const type = conn.effectiveType;
+  if (type === "slow-2g" || type === "2g") return "slow";
+  if (type === "3g") return "medium";
+  return "fast";
+}
+
 export default function Home() {
   const [introComplete, setIntroComplete] = useState(false);
   const [introStarted, setIntroStarted] = useState(false);
+  const [typewriterVisible, setTypewriterVisible] = useState(false);
   const activeSection = useActiveSection();
   const { hasEntered, skippedModal, enter, playTypewriter, stopTypewriterAndPlayMusic } = useAudioContext();
+
+  // Preload state: which sections should load their videos
+  const [preloadSections, setPreloadSections] = useState<Set<string>>(new Set());
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Check if a section's video should start loading
+  const shouldPreload = useCallback((sectionId: string) => {
+    return preloadSections.has(sectionId);
+  }, [preloadSections]);
 
   // Auto-start typewriter sequence if modal was skipped (returning visitor)
   useEffect(() => {
     if (skippedModal && !introStarted) {
+      setTypewriterVisible(true);
       setIntroStarted(true);
       playTypewriter();
+      // Returning visitor: preload all sections immediately
+      setPreloadSections(new Set(["01 Threshold", "02 The Named Thing", "03 The Sequence", "04 The Door"]));
     }
   }, [skippedModal, introStarted, playTypewriter]);
 
   const handleEnter = () => {
     enter();
-    setIntroStarted(true);
-    playTypewriter();
+    // Fade in the typewriter area, then start typing
+    setTypewriterVisible(true);
+    setTimeout(() => {
+      setIntroStarted(true);
+      playTypewriter();
+    }, 800);
+
+    // Start preloading based on network speed
+    const speed = getNetworkSpeed();
+    const sectionsToPreload = ["01 Threshold"];
+
+    if (speed === "medium" || speed === "fast") {
+      sectionsToPreload.push("02 The Named Thing");
+    }
+    if (speed === "fast") {
+      sectionsToPreload.push("03 The Sequence");
+    }
+
+    setPreloadSections(new Set(sectionsToPreload));
   };
 
   const handleIntroComplete = () => {
     setIntroComplete(true);
-    stopTypewriterAndPlayMusic();
+    setTimeout(() => {
+      stopTypewriterAndPlayMusic();
+    }, 750);
   };
+
+  // Rolling prefetch: when user approaches a section, preload the next one
+  useEffect(() => {
+    if (!introComplete || !containerRef.current) return;
+
+    // Clean up old observer
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    const sections = containerRef.current.querySelectorAll("section[data-screen-label]");
+    const sectionOrder = ["01 Threshold", "02 The Named Thing", "03 The Sequence", "04 The Door"];
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const currentId = entry.target.getAttribute("data-screen-label");
+            if (!currentId) return;
+
+            const currentIndex = sectionOrder.indexOf(currentId);
+            if (currentIndex === -1) return;
+
+            // Preload next section
+            const nextIndex = currentIndex + 1;
+            if (nextIndex < sectionOrder.length) {
+              setPreloadSections((prev) => {
+                const next = new Set(prev);
+                next.add(sectionOrder[nextIndex]);
+                return next;
+              });
+            }
+          }
+        });
+      },
+      { rootMargin: "100% 0px" } // Start loading ~1 viewport ahead
+    );
+
+    sections.forEach((section) => observerRef.current?.observe(section));
+
+    return () => observerRef.current?.disconnect();
+  }, [introComplete]);
 
   // Arrow key navigation between sections
   useSectionNavigation();
 
   return (
     <div
+      ref={containerRef}
       style={{
         background: introComplete ? "var(--paper)" : "#000",
         fontFamily: "'Archivo Narrow',system-ui,sans-serif",
@@ -148,7 +236,8 @@ export default function Home() {
         <VideoBackground
           src="/movies/homepage/desktop/01-cityscapes.webm"
           mobileSrc="/movies/homepage/mobile/01-cityscapes.webm"
-          poster="/poster/cityscape.png"
+          poster="/poster/cityscape.webp"
+          preload={shouldPreload("01 Threshold") ? "auto" : "none"}
           paused={!introComplete || activeSection !== "01 Threshold"}
           fadeInOnStart
         />
@@ -174,7 +263,7 @@ export default function Home() {
             zIndex: 2,
             maxWidth: 1320,
             margin: "0 auto",
-            padding: "calc(190px * var(--pace)) clamp(24px,5.5vw,96px) calc(var(--footer-height) + var(--footer-clearance))",
+            padding: "calc(190px * var(--pace)) clamp(24px,5.5vw,96px) clamp(48px, 6vw, 80px)",
             display: "grid",
             gridTemplateColumns: "minmax(0,10ch) minmax(0,1fr)",
             gap: "clamp(16px,4vw,48px)",
@@ -202,6 +291,8 @@ export default function Home() {
                 letterSpacing: "-0.022em",
                 whiteSpace: "nowrap",
                 color: "#F5F2EA",
+                opacity: typewriterVisible ? 1 : 0,
+                transition: "opacity 1.5s ease-out",
               }}
             >
               <TypeWriter
@@ -210,7 +301,7 @@ export default function Home() {
                   { text: "\nwith clarity.", pauseBlinks: 0 },
                 ]}
                 speed={70}
-                delay={1500}
+                delay={1800}
                 start={introStarted}
                 onComplete={handleIntroComplete}
               />
@@ -248,7 +339,8 @@ export default function Home() {
         <VideoBackground
           src="/movies/homepage/desktop/02-architectural.webm"
           mobileSrc="/movies/homepage/mobile/02-architectural.webm"
-          poster="/poster/architecture.png"
+          poster="/poster/architecture.webp"
+          preload={shouldPreload("02 The Named Thing") ? "auto" : "none"}
           paused={activeSection !== "02 The Named Thing"}
         />
 
@@ -326,7 +418,8 @@ export default function Home() {
         <VideoBackground
           src="/movies/homepage/desktop/03-diagnosis.webm"
           mobileSrc="/movies/homepage/mobile/03-diagnosis.webm"
-          poster="/poster/diagnosis.png"
+          poster="/poster/diagnosis.webp"
+          preload={shouldPreload("03 The Sequence") ? "auto" : "none"}
           paused={activeSection !== "03 The Sequence"}
         />
 
@@ -380,7 +473,7 @@ export default function Home() {
                   color: "#C4B08A",
                 }}
               >
-                Starting: $5,000
+                From $5,000
               </p>
 
               <p
@@ -435,27 +528,27 @@ export default function Home() {
                 Core Services
               </p>
               <div style={{ paddingTop: "calc(10px * var(--pace))" }}>
-                <Link href="/services/build" className="rule-link" style={{ ...seqRowLink, color: "#F5F2EA" }}>
+                <span style={{ ...seqRowLink, color: "#D88888" }}>
                   01. Build
-                </Link>
+                </span>
                 <p style={{ margin: "0.8em 0 0", color: "rgba(255,255,255,0.8)" }}>
                 When something needs to be made.
                 </p>
               </div>
 
               <div style={{ borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: "calc(34px * var(--pace))" }}>
-                <Link href="/services/care" className="rule-link" style={{ ...seqRowLink, color: "#F5F2EA" }}>
+                <span style={{ ...seqRowLink, color: "#8AB8D0" }}>
                   02. Care
-                </Link>
+                </span>
                 <p style={{ margin: "0.8em 0 0", color: "rgba(255,255,255,0.8)" }}>
                 When something needs to be maintained.
                 </p>
               </div>
 
               <div style={{ borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: "calc(34px * var(--pace))" }}>
-                <Link href="/services/grow" className="rule-link" style={{ ...seqRowLink, color: "#F5F2EA" }}>
+                <span style={{ ...seqRowLink, color: "#8AC98A" }}>
                   03. Grow
-                </Link>
+                </span>
                 <p style={{ margin: "0.8em 0 0", color: "rgba(255,255,255,0.8)" }}>
                   When something needs to reach more people.
                 </p>
@@ -481,7 +574,8 @@ export default function Home() {
         <VideoBackground
           src="/movies/homepage/desktop/04-conversation.webm"
           mobileSrc="/movies/homepage/mobile/04-conversation.webm"
-          poster="/poster/coffee.png"
+          poster="/poster/coffee.webp"
+          preload={shouldPreload("04 The Door") ? "auto" : "none"}
           paused={activeSection !== "04 The Door"}
         />
 
@@ -501,9 +595,8 @@ export default function Home() {
         {/* Content */}
         <div
           style={{
-            ...sectionGrid(140, 0),
+            ...sectionGrid(140, 80),
             position: "relative",
-            paddingBottom: "calc(var(--footer-height) + var(--footer-clearance))",
             zIndex: 2,
           }}
         >
@@ -572,7 +665,7 @@ export default function Home() {
                 If we&apos;re not a good fit, we&apos;ll say so.
               </p>
               <Link
-                href="/start-here"
+                href="/lets-talk"
                 className="cta-link"
                 style={{
                   display: "inline-flex",

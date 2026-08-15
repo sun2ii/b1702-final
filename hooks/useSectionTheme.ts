@@ -51,7 +51,7 @@ export function useSectionTheme(): SectionTheme {
       });
 
       if (closestSection && closestDistance < viewportHeight * 0.3) {
-        const t = closestSection.getAttribute("data-theme") as SectionTheme;
+        const t = (closestSection as HTMLElement).getAttribute("data-theme") as SectionTheme;
         if (t) setTheme(t);
       }
     };

@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback, type CSSProperties } from "react";
+import VideoBackground from "@/components/VideoBackground";
+import { useActiveSection } from "@/hooks/useActiveSection";
+
+// Mobile breakpoint (matches site-wide standard)
+const MOBILE_BREAKPOINT = 768;
 
 const serif = "'Playfair Display', Georgia, serif";
 
@@ -20,9 +25,14 @@ const chapterNumeral: CSSProperties = {
   color: "var(--faint)",
 };
 
-// Circle sizes
-const DIMENSION_SIZE = 90;  // four dimension nodes
-const SYNTHESIS_SIZE = 44;  // Binary1702 Systems triangle (larger, more presence)
+// Circle sizes (made responsive via getDimensionSize)
+const DIMENSION_SIZE_DESKTOP = 90;  // four dimension nodes
+const DIMENSION_SIZE_MOBILE = 54;   // Slightly smaller but still touch-friendly
+const SYNTHESIS_SIZE_DESKTOP = 44;  // Binary1702 Systems triangle
+const SYNTHESIS_SIZE_MOBILE = 36;
+
+// Minimum touch target (wrapper will be at least this size)
+const MIN_TOUCH_TARGET = 44;
 
 // Circle border thickness
 const CIRCLE_STROKE = 3;
@@ -33,8 +43,9 @@ const SYNTHESIS_CONNECTION_RADIUS = 8;  // Lines terminate at this radius from s
 // Layout center (percentages of container)
 const CENTER = { x: 50, y: 50 };
 
-// Square side length in pixels — used to calculate spread
-const SQUARE_SIDE = 260;
+// Square side length in pixels — used to calculate spread (made responsive via getSquareSide)
+const SQUARE_SIDE_DESKTOP = 260;
+// Mobile will derive this from container width for better fit
 
 // The four dimensions (content only — positions calculated from SQUARE_SIDE)
 const DIMENSION_NODES = [
@@ -106,6 +117,7 @@ const HOVER_TRANSITION = 200;
 export default function RealitySection() {
   const sectionRef = useRef<HTMLElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
+  const activeSection = useActiveSection();
   const [isInView, setIsInView] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
@@ -124,6 +136,9 @@ export default function RealitySection() {
   // Container dimensions for responsive positioning
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
 
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(false);
+
   // Check prefers-reduced-motion
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -131,6 +146,14 @@ export default function RealitySection() {
     const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  // Check mobile breakpoint
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   // Track container size
@@ -240,17 +263,30 @@ export default function RealitySection() {
     y: (CENTER.y / 100) * containerSize.height,
   };
 
+  // Get responsive sizes - mobile derives square from container width
+  const mobileSquareSide = Math.min(
+    Math.max(containerSize.width * 0.55, 140), // 55% of container, min 140
+    220 // max 220
+  );
+  const squareSide = isMobile ? mobileSquareSide : SQUARE_SIDE_DESKTOP;
+  const dimensionSize = isMobile ? DIMENSION_SIZE_MOBILE : DIMENSION_SIZE_DESKTOP;
+  const synthesisSize = isMobile ? SYNTHESIS_SIZE_MOBILE : SYNTHESIS_SIZE_DESKTOP;
+
+  // Touch target wrapper size (at least MIN_TOUCH_TARGET)
+  const touchTargetSize = Math.max(dimensionSize, MIN_TOUCH_TARGET);
+  const synthesisTouchTargetSize = Math.max(synthesisSize, MIN_TOUCH_TARGET);
+
   // Get pixel position for a dimension node (perfect square layout)
   const getDimensionPos = useCallback(
     (corner: keyof typeof CORNER_OFFSETS) => {
       const offset = CORNER_OFFSETS[corner];
-      const halfSide = SQUARE_SIDE / 2;
+      const halfSide = squareSide / 2;
       return {
         x: centerPx.x + offset.x * halfSide,
         y: centerPx.y + offset.y * halfSide,
       };
     },
-    [centerPx]
+    [centerPx, squareSide]
   );
 
   // Synthesis position = exact center (canonical anchor for triangle, lines, label)
@@ -307,76 +343,126 @@ export default function RealitySection() {
         background: "var(--room-bg)",
         scrollSnapAlign: "start",
         boxSizing: "border-box",
+        overflow: "hidden",
       }}
     >
-      {/* Chapter header — fixed position at top, matching 02 */}
-      <div
-        style={{
-          position: "absolute",
-          top: "calc(190px * var(--pace, 1))",
-          left: 0,
-          right: 0,
-          zIndex: 20,
-        }}
-      >
+      {/* Video background - using desktop version for both (mobile 720p was poor quality) */}
+      <VideoBackground
+        src="/movies/diagnose/desktop/03-reality-1080p.webm"
+        playbackRate={1}
+        paused={activeSection !== "03 The Reality"}
+        fadeDuration={0}
+        pauseDuration={0}
+      />
+
+      {/* Chapter header — fixed position at top, matching 02 (desktop only) */}
+      {!isMobile && (
         <div
           style={{
-            maxWidth: 1320,
-            margin: "0 auto",
-            padding: "0 clamp(24px, 5.5vw, 96px)",
-            display: "grid",
-            gridTemplateColumns: "minmax(0,10ch) minmax(0,1fr)",
-            gap: "clamp(16px, 4vw, 48px)",
-            boxSizing: "border-box",
+            position: "absolute",
+            top: "calc(190px * var(--pace, 1))",
+            left: 0,
+            right: 0,
+            zIndex: 20,
           }}
         >
           <div
             style={{
-              fontSize: 15,
-              fontWeight: 600,
-              letterSpacing: "0.12em",
-              color: "rgba(255,255,255,0.6)",
+              maxWidth: 1320,
+              margin: "0 auto",
+              padding: "0 clamp(24px, 5.5vw, 96px)",
+              display: "grid",
+              gridTemplateColumns: "minmax(0,10ch) minmax(0,1fr)",
+              gap: "clamp(16px, 4vw, 48px)",
+              boxSizing: "border-box",
             }}
           >
-            03
-          </div>
-          <div>
-            <p
+            <div
               style={{
-                margin: 0,
-                fontSize: 13,
+                fontSize: 15,
                 fontWeight: 600,
-                letterSpacing: "0.15em",
-                textTransform: "uppercase",
-                color: "rgba(255,255,255,0.5)",
+                letterSpacing: "0.12em",
+                color: "rgba(255,255,255,0.6)",
               }}
             >
-              The Reality
-            </p>
+              03
+            </div>
+            <div>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.5)",
+                }}
+              >
+                The Reality
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Main content area */}
       <div
-        style={{
+        style={isMobile ? {
+          position: "relative",
+          zIndex: 2,
+          maxWidth: 1320,
+          margin: "0 auto",
+          padding: "clamp(100px, 18vh, 140px) clamp(20px, 5vw, 32px) 80px",
+          display: "flex",
+          flexDirection: "column",
+          minHeight: "100vh",
+          boxSizing: "border-box",
+        } : {
+          position: "relative",
+          zIndex: 2,
           maxWidth: 1320,
           margin: "0 auto",
           padding: "calc(190px * var(--pace, 1) + 80px) clamp(24px,5.5vw,96px) 120px",
           display: "grid",
-          gridTemplateColumns: "minmax(0,10ch) minmax(280px, 1fr) minmax(400px, 1.2fr)",
+          gridTemplateColumns: "minmax(0,10ch) minmax(280px, 1fr) minmax(320px, 1.2fr)",
           gap: "clamp(16px,4vw,48px)",
           alignItems: "start",
           minHeight: "100vh",
           boxSizing: "border-box",
         }}
       >
-        {/* Empty column to align with chapter number */}
-        <div />
+        {/* Empty column to align with chapter number (hidden on mobile) */}
+        {!isMobile && <div />}
 
         {/* Left column: text content */}
-        <div style={{ paddingTop: "20px" }}>
-          {/* Main heading — fades in */}
+        <div style={{ paddingTop: isMobile ? 0 : 20 }}>
+          {/* Mobile chapter label */}
+          {isMobile && (
+            <div style={{ marginBottom: 12 }}>
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  letterSpacing: "0.15em",
+                  color: "rgba(255,255,255,0.5)",
+                }}
+              >
+                03
+              </span>
+              <span
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                  color: "rgba(255,255,255,0.5)",
+                  marginLeft: 16,
+                }}
+              >
+                The Reality
+              </span>
+            </div>
+          )}
           {/* Main heading */}
           <h2
             className="reality-fade"
@@ -384,7 +470,7 @@ export default function RealitySection() {
               margin: 0,
               fontFamily: serif,
               fontWeight: 400,
-              fontSize: "clamp(1.6rem, 5vw, 2.4rem)",
+              fontSize: isMobile ? "clamp(1.5rem, 7vw, 2rem)" : "clamp(1.6rem, 5vw, 2.4rem)",
               lineHeight: 1.15,
               letterSpacing: "-0.02em",
               opacity: headingVisible ? 1 : 0,
@@ -398,10 +484,10 @@ export default function RealitySection() {
           <p
             className="reality-fade"
             style={{
-              margin: "calc(24px * var(--pace)) 0 0",
+              margin: isMobile ? "12px 0 0" : "calc(24px * var(--pace)) 0 0",
               fontFamily: serif,
               fontWeight: 400,
-              fontSize: "clamp(0.9rem, 1.4vw, 1.1rem)",
+              fontSize: isMobile ? "0.95rem" : "clamp(0.9rem, 1.4vw, 1.1rem)",
               lineHeight: 1.5,
               color: "var(--graphite)",
               opacity: bridgeVisible ? 1 : 0,
@@ -409,16 +495,16 @@ export default function RealitySection() {
               transition: `opacity ${HEADING_DURATION}ms ease, transform ${HEADING_DURATION}ms ease`,
             }}
           >
-            The real problem is usually somewhere beneath it.
+            The real problem is usually somewhere <em style={{ color: "#a78bfa", fontStyle: "normal" }}>beneath</em> it.
           </p>
 
           {/* Four dimensions — where we look */}
           <table
             style={{
-              marginTop: "calc(40px * var(--pace))",
+              marginTop: isMobile ? 20 : "calc(40px * var(--pace))",
               borderCollapse: "collapse",
-              fontSize: "clamp(0.95rem, 1.1vw, 1.05rem)",
-              lineHeight: 1.6,
+              fontSize: isMobile ? "0.9rem" : "clamp(0.95rem, 1.1vw, 1.05rem)",
+              lineHeight: 1.5,
               color: "var(--graphite)",
             }}
           >
@@ -439,8 +525,8 @@ export default function RealitySection() {
                       transform: rowVisible ? "translateY(0)" : "translateY(8px)",
                     }}
                   >
-                    <td style={{ fontWeight: 600, paddingRight: "1em", paddingBottom: "0.35em" }}>{row.label}</td>
-                    <td style={{ paddingBottom: "0.35em" }}>{row.desc}</td>
+                    <td style={{ fontWeight: 600, paddingRight: isMobile ? "0.6em" : "1em", paddingBottom: isMobile ? "0.25em" : "0.35em" }}>{row.label}</td>
+                    <td style={{ paddingBottom: isMobile ? "0.25em" : "0.35em" }}>{row.desc}</td>
                   </tr>
                 );
               })}
@@ -451,8 +537,8 @@ export default function RealitySection() {
           <p
             className="reality-fade"
             style={{
-              marginTop: "calc(32px * var(--pace))",
-              fontSize: "clamp(1.6rem, 2.2vw, 2rem)",
+              marginTop: isMobile ? 20 : "calc(32px * var(--pace))",
+              fontSize: isMobile ? "1.3rem" : "clamp(1.6rem, 2.2vw, 2rem)",
               fontFamily: serif,
               fontStyle: "italic",
               fontWeight: 400,
@@ -476,8 +562,9 @@ export default function RealitySection() {
           style={{
             position: "relative",
             width: "100%",
-            height: "clamp(380px, 50vh, 480px)",
-            marginTop: "-80px",
+            height: isMobile ? "clamp(280px, 45vh, 380px)" : "clamp(380px, 50vh, 480px)",
+            marginTop: isMobile ? "auto" : "-80px",
+            flexShrink: 0,
           }}
         >
             {/* SVG for relationship lines */}
@@ -513,7 +600,7 @@ export default function RealitySection() {
                   };
 
                   // Line ends at dimension circle boundary, not center
-                  const circleRadius = DIMENSION_SIZE / 2;
+                  const circleRadius = dimensionSize / 2;
                   const endPoint = {
                     x: nodePos.x - (dx / length) * circleRadius,
                     y: nodePos.y - (dy / length) * circleRadius,
@@ -556,26 +643,11 @@ export default function RealitySection() {
               {/* Only show when synthesis is visible */}
               {showSynthesis && (
                 <polygon
-                  points={`${synthesisPos.x},${synthesisPos.y - SYNTHESIS_SIZE * 0.36} ${synthesisPos.x + SYNTHESIS_SIZE * 0.39},${synthesisPos.y + SYNTHESIS_SIZE * 0.22} ${synthesisPos.x - SYNTHESIS_SIZE * 0.39},${synthesisPos.y + SYNTHESIS_SIZE * 0.22}`}
+                  points={`${synthesisPos.x},${synthesisPos.y - synthesisSize * 0.36} ${synthesisPos.x + synthesisSize * 0.39},${synthesisPos.y + synthesisSize * 0.22} ${synthesisPos.x - synthesisSize * 0.39},${synthesisPos.y + synthesisSize * 0.22}`}
                   fill="rgb(26, 26, 26)"
                 />
               )}
 
-              {/* Center dots for all dimension nodes - only show when their circle is visible */}
-              {DIMENSION_NODES.map((node, index) => {
-                const pos = getDimensionPos(node.corner);
-                const dotVisible = getDimensionVisible(index);
-                return (
-                  <circle
-                    key={`center-${node.id}`}
-                    cx={pos.x}
-                    cy={pos.y}
-                    r={3}
-                    fill="rgba(255,255,255,0.3)"
-                    style={{ opacity: dotVisible ? 1 : 0 }}
-                  />
-                );
-              })}
             </svg>
 
             {/* Dimension nodes (People, Process, Technology, Constraints) */}
@@ -619,29 +691,44 @@ export default function RealitySection() {
                     position: "absolute",
                     left: pos.x,
                     top: pos.y,
-                    width: DIMENSION_SIZE,
-                    height: DIMENSION_SIZE,
+                    // Use touch target size for wrapper, but visual circle is dimensionSize
+                    width: touchTargetSize,
+                    height: touchTargetSize,
                     transform: "translate(-50%, -50%)",
                     cursor: "pointer",
                     opacity: visible ? (hasActiveOther && !purpleMode ? 0.4 : 1) : 0,
                     transition: `opacity ${visible ? NODE_DURATION : 0}ms ease`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                   onMouseEnter={() => setActiveNode(node.id)}
                   onMouseLeave={() => setActiveNode(null)}
                   onClick={() => handleTap(node.id)}
                 >
-                  {/* Circle — fills the wrapper exactly */}
+                  {/* Circle — visual size is dimensionSize */}
                   <div
                     className="node-circle"
                     style={{
-                      width: "100%",
-                      height: "100%",
+                      width: dimensionSize,
+                      height: dimensionSize,
                       borderRadius: "50%",
                       border: `${CIRCLE_STROKE}px solid ${circleBorder}`,
-                      background: circleFill,
+                      background: isActive
+                        ? "rgba(139,92,246,0.3)"
+                        : isConnected
+                          ? "rgba(139,92,246,0.15)"
+                          : "rgba(0,0,0,0.4)",
+                      backdropFilter: "blur(8px)",
+                      WebkitBackdropFilter: "blur(8px)",
+                      boxShadow: isActive
+                        ? "0 8px 32px rgba(0,0,0,0.4), 0 0 40px rgba(139,92,246,0.4), inset 0 1px 0 rgba(255,255,255,0.15)"
+                        : "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)",
                       boxSizing: "border-box",
-                      transition: `border-color 500ms ease, background 500ms ease, transform ${NODE_DURATION}ms ease`,
-                      transform: visible ? "scale(1)" : "scale(0.8)",
+                      transition: `border-color 300ms ease, background 300ms ease, transform 300ms ease, box-shadow 300ms ease`,
+                      transform: visible
+                        ? (isActive ? "scale(1.08)" : "scale(1)")
+                        : "scale(0.8)",
                     }}
                   />
 
@@ -653,9 +740,9 @@ export default function RealitySection() {
                       left: "50%",
                       transform: "translateX(-50%)",
                       ...(isTopNode
-                        ? { bottom: "100%", marginBottom: 10 }
-                        : { top: "100%", marginTop: 10 }),
-                      fontSize: "clamp(0.75rem, 1vw, 0.875rem)",
+                        ? { bottom: "100%", marginBottom: isMobile ? 6 : 10 }
+                        : { top: "100%", marginTop: isMobile ? 6 : 10 }),
+                      fontSize: isMobile ? "0.7rem" : "clamp(0.75rem, 1vw, 0.875rem)",
                       fontWeight: 500,
                       letterSpacing: "0.08em",
                       textTransform: "uppercase",
@@ -673,7 +760,7 @@ export default function RealitySection() {
             })}
 
             {/* Binary1702 Systems — the synthesis node */}
-            {/* Wrapper is exactly SYNTHESIS_SIZE × SYNTHESIS_SIZE, centered on synthesisPos */}
+            {/* Wrapper uses touch target size, centered on synthesisPos */}
             {/* Labels are absolutely positioned outside so they don't affect wrapper dimensions */}
             <div
               className="system-node synthesis-node"
@@ -681,33 +768,43 @@ export default function RealitySection() {
                 position: "absolute",
                 left: synthesisPos.x,
                 top: synthesisPos.y,
-                width: SYNTHESIS_SIZE,
-                height: SYNTHESIS_SIZE,
+                width: synthesisTouchTargetSize,
+                height: synthesisTouchTargetSize,
                 transform: "translate(-50%, -50%)",
                 cursor: "pointer",
                 opacity: showSynthesis ? (activeNode && activeNode !== "binary1702-systems" && !isConnectedToActive("binary1702-systems") ? 0.5 : 1) : 0,
                 transition: `opacity ${SYNTHESIS_REVEAL_DURATION}ms ease`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
               onMouseEnter={() => setActiveNode("binary1702-systems")}
               onMouseLeave={() => setActiveNode(null)}
               onClick={() => handleTap("binary1702-systems")}
             >
-              {/* Triangle — fills the wrapper exactly */}
+              {/* Triangle — visual size is synthesisSize */}
               <svg
                 className="synthesis-triangle"
-                width="100%"
-                height="100%"
+                width={synthesisSize}
+                height={synthesisSize}
                 viewBox="0 0 36 36"
                 style={{
-                  transition: `transform 500ms ease, opacity ${SYNTHESIS_REVEAL_DURATION}ms ease`,
+                  filter: "drop-shadow(0 6px 20px rgba(83,55,148,0.5)) drop-shadow(0 2px 8px rgba(0,0,0,0.4))",
+                  transition: `transform 500ms ease, opacity ${SYNTHESIS_REVEAL_DURATION}ms ease, filter 500ms ease`,
                   transform: showSynthesis
                     ? ((synthesisEffect || activeNode === "binary1702-systems") ? "scale(1.2)" : "scale(1)")
                     : "scale(0.8)",
                 }}
               >
+                <defs>
+                  <linearGradient id="triangleGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="rgb(120, 80, 180)" />
+                    <stop offset="100%" stopColor="rgb(60, 40, 110)" />
+                  </linearGradient>
+                </defs>
                 <polygon
                   points="18,1 32,27 4,27"
-                  fill="rgb(83, 55, 148)"    
+                  fill="url(#triangleGradient)"
                 />
               </svg>
 

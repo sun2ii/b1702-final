@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import { useAudioContext } from "@/components/AudioProvider";
 import VideoBackground from "@/components/VideoBackground";
 import VoicesEntering from "@/components/VoicesEntering";
 import RealitySection from "@/components/RealitySection";
@@ -17,6 +18,302 @@ const Scene3D = dynamic(() => import("@/components/Scene3D"), {
 });
 
 const serif = "'Playfair Display',Georgia,serif";
+
+// Decision Section paths data
+const PATHS = [
+  {
+    id: "build",
+    label: "Build",
+    numeral: "01",
+    color: "#D88888",
+    hoverBg: "rgba(216, 136, 136, 0.25)",
+    href: "/services/build",
+    tagline: "0 → 1.",
+    bullets: ["Let's turn an idea into something real."],
+    grounding: "Websites · Automations · Integrations · AI Systems",
+  },
+  {
+    id: "care",
+    label: "Care",
+    numeral: "02",
+    color: "#8AB8D0",
+    hoverBg: "rgba(138, 184, 208, 0.25)",
+    href: "/services/care",
+    tagline: "Keep running.",
+    bullets: ["Let's keep what you have working."],
+    grounding: "Maintenance · Improvements · Technical Support",
+  },
+  {
+    id: "grow",
+    label: "Grow",
+    numeral: "03",
+    color: "#8AC98A",
+    hoverBg: "rgba(138, 201, 138, 0.25)",
+    href: "/services/grow",
+    tagline: "Get seen.",
+    bullets: ["Let's grow the audience."],
+    grounding: "SEO · Content · Campaigns · Distribution",
+  },
+] as const;
+
+function DecisionSection({
+  activeSection,
+  chapterNumeral,
+  serif,
+}: {
+  activeSection: string | null;
+  chapterNumeral: CSSProperties;
+  serif: string;
+}) {
+  const [hoveredPath, setHoveredPath] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  return (
+    <section
+      data-screen-label="05 The Decision"
+      data-theme="dark"
+      style={{
+        position: "relative",
+        minHeight: "100vh",
+        background: "var(--room-bg)",
+        scrollSnapAlign: "start",
+        boxSizing: "border-box",
+        overflow: "hidden",
+      }}
+    >
+      <VideoBackground
+        src="/movies/diagnose/desktop/05-service-1080p.webm"
+        playbackRate={1}
+        paused={activeSection !== "05 The Decision"}
+        darkOverlay={0.8}
+      />
+
+      <div
+        style={{
+          position: "relative",
+          zIndex: 2,
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-start",
+          padding: "calc(120px * var(--pace)) clamp(24px,5.5vw,96px) 120px",
+          maxWidth: 1320,
+          margin: "0 auto",
+          boxSizing: "border-box",
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(0,10ch) minmax(0,1fr)",
+            gap: "clamp(16px,4vw,48px)",
+            marginBottom: "calc(80px * var(--pace))",
+          }}
+        >
+          <div style={chapterNumeral}>05</div>
+          <div>
+            <p
+              style={{
+                margin: "0 0 calc(24px * var(--pace))",
+                fontSize: 13,
+                fontWeight: 600,
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+                color: "var(--faint)",
+              }}
+            >
+              The Decision
+            </p>
+            <h2
+              style={{
+                margin: 0,
+                fontFamily: serif,
+                fontWeight: 400,
+                fontSize: "clamp(2rem, 5vw, 3.5rem)",
+                lineHeight: 1.08,
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Let's work together.
+            </h2>
+          </div>
+        </div>
+
+        {/* Architectural Frame with Three Zones */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            border: "1px solid rgba(255,255,255,0.25)",
+            marginTop: isMobile ? 40 : "auto",
+            transform: isMobile ? "translateY(50%)" : "none",
+          }}
+        >
+          {PATHS.map((path, i) => {
+            const isHovered = hoveredPath === path.id;
+            const isLast = i === PATHS.length - 1;
+
+            return (
+              <Link
+                key={path.id}
+                href={path.href}
+                onMouseEnter={() => setHoveredPath(path.id)}
+                onMouseLeave={() => setHoveredPath(null)}
+                onFocus={() => setHoveredPath(path.id)}
+                onBlur={() => setHoveredPath(null)}
+                style={{
+                  flex: 1,
+                  position: "relative",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  textAlign: "center",
+                  textDecoration: "none",
+                  cursor: "pointer",
+                  padding: isMobile
+                    ? "20px 8px"
+                    : "clamp(32px, 4vw, 48px) clamp(24px, 3vw, 40px)",
+                  borderRight: !isLast ? "1px solid rgba(255,255,255,0.2)" : "none",
+                  background: isHovered ? path.hoverBg : "transparent",
+                  transition: "background 400ms ease-out",
+                  outline: "none",
+                }}
+              >
+                {/* Numeral */}
+                <span
+                  style={{
+                    fontSize: isMobile ? 10 : 12,
+                    fontWeight: 600,
+                    letterSpacing: "0.18em",
+                    color: path.color,
+                    marginBottom: isMobile ? 8 : 16,
+                    transition: "filter 300ms ease",
+                    filter: isHovered ? "brightness(1.2)" : "none",
+                  }}
+                >
+                  {path.numeral}
+                </span>
+
+                {/* Big Title */}
+                <span
+                  style={{
+                    fontFamily: serif,
+                    fontSize: isMobile ? "clamp(1.3rem, 6vw, 1.6rem)" : "clamp(2.2rem, 4.5vw, 3.5rem)",
+                    fontWeight: 400,
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1,
+                    color: path.color,
+                    marginBottom: isMobile ? 8 : "clamp(20px, 2.5vw, 28px)",
+                    transition: "filter 300ms ease",
+                    filter: isHovered ? "brightness(1.2)" : "none",
+                  }}
+                >
+                  {path.label}
+                </span>
+
+                {/* Horizontal rule - hidden on mobile */}
+                {!isMobile && (
+                  <span
+                    style={{
+                      width: "100%",
+                      maxWidth: 100,
+                      height: 1,
+                      background: path.color,
+                      opacity: isHovered ? 0.8 : 0.5,
+                      marginBottom: "clamp(20px, 2.5vw, 28px)",
+                      transition: "opacity 300ms ease",
+                    }}
+                  />
+                )}
+
+                {/* Tagline */}
+                <span
+                  style={{
+                    fontFamily: serif,
+                    fontSize: isMobile ? "0.8rem" : "clamp(1.3rem, 1.8vw, 1.6rem)",
+                    fontWeight: 400,
+                    fontStyle: "italic",
+                    letterSpacing: "-0.01em",
+                    lineHeight: 1.3,
+                    color: "var(--ink)",
+                    marginBottom: isMobile ? 0 : "clamp(16px, 2vw, 24px)",
+                  }}
+                >
+                  {path.tagline}
+                </span>
+
+                {/* Arrow - desktop only */}
+                {!isMobile && (
+                  <span
+                    style={{
+                      color: path.color,
+                      fontSize: "1.4rem",
+                      fontWeight: 300,
+                      opacity: isHovered ? 1 : 0.6,
+                      transform: isHovered ? "translateY(4px)" : "translateY(0)",
+                      transition: "opacity 300ms ease, transform 300ms ease",
+                      marginBottom: "clamp(16px, 2vw, 24px)",
+                    }}
+                    aria-hidden="true"
+                  >
+                    ↓
+                  </span>
+                )}
+
+                {/* Bullets - desktop only */}
+                {!isMobile && (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 6,
+                      marginBottom: "clamp(20px, 2.5vw, 28px)",
+                    }}
+                  >
+                    {path.bullets.map((bullet, j) => (
+                      <span
+                        key={j}
+                        style={{
+                          fontSize: "clamp(0.9rem, 1vw, 1rem)",
+                          lineHeight: 1.5,
+                          color: "var(--graphite)",
+                        }}
+                      >
+                        {bullet}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Grounding line - desktop only */}
+                {!isMobile && (
+                  <span
+                    style={{
+                      fontSize: "clamp(0.75rem, 0.85vw, 0.85rem)",
+                      letterSpacing: "0.02em",
+                      color: "var(--faint)",
+                      marginTop: "auto",
+                    }}
+                  >
+                    {path.grounding}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 const bodyMd: CSSProperties = {
   margin: 0,
@@ -37,18 +334,38 @@ const chapterNumeral: CSSProperties = {
 export default function DiagnosePage() {
   useSectionNavigation();
   const activeSection = useActiveSection();
+  const { setMusicTrack } = useAudioContext();
   const [activeModel, setActiveModel] = useState<ModelType>("system-map");
   const [modelVisible, setModelVisible] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Curtain reveal on model change
+  // Check mobile breakpoint
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Set diagnose-specific music track (base name only, AudioProvider handles format)
+  useEffect(() => {
+    setMusicTrack("diagnose");
+    return () => setMusicTrack("homepage");
+  }, [setMusicTrack]);
+
+  // Clip reveal on model change
   const handleModelChange = (newModel: ModelType) => {
     if (newModel === activeModel) return;
-    setModelVisible(false); // Close curtain
+    setModelVisible(false); // Clip closed
     setTimeout(() => {
       setActiveModel(newModel);
-      // Small delay to let model load, then open curtain
-      setTimeout(() => setModelVisible(true), 50);
-    }, 400);
+      // Give React/R3F two frames to settle before reveal
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setModelVisible(true);
+        });
+      });
+    }, 1800); // Match clip-path transition duration
   };
 
   return (
@@ -86,26 +403,13 @@ export default function DiagnosePage() {
           paused={activeSection !== "00 Opening"}
         />
 
-        {/* Dark overlay */}
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            background: "rgba(0,0,0,0.5)",
-            zIndex: 1,
-          }}
-        />
-
         <div
           style={{
             position: "relative",
             zIndex: 2,
             maxWidth: 1320,
             margin: "0 auto",
-            padding: "calc(190px * var(--pace)) clamp(24px,5.5vw,96px) calc(var(--footer-height) + var(--footer-clearance))",
+            padding: "calc(190px * var(--pace)) clamp(24px,5.5vw,96px) clamp(48px, 6vw, 80px)",
             display: "grid",
             gridTemplateColumns: "minmax(0,10ch) minmax(0,1fr)",
             gap: "clamp(16px,4vw,48px)",
@@ -148,7 +452,7 @@ export default function DiagnosePage() {
                 color: "#C4B08A",
               }}
             >
-              Starting: $5,000
+              From $5,000
             </p>
             <p
               style={{
@@ -185,19 +489,6 @@ export default function DiagnosePage() {
           mobileSrc="/movies/diagnose/mobile/02-request-720p.webm"
           playbackRate={0.65}
           paused={activeSection !== "02 The Request"}
-        />
-
-        {/* Dark overlay */}
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            background: "rgba(0,0,0,0.5)",
-            zIndex: 1,
-          }}
         />
 
         <VoicesEntering />
@@ -244,28 +535,56 @@ export default function DiagnosePage() {
         return (
           <section
             data-screen-label="04 The Binary 1702 Effect"
+            data-theme="dark"
             style={{
+              position: "relative",
               minHeight: "100vh",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              padding: "120px clamp(24px,5.5vw,96px)",
-              maxWidth: 1320,
-              margin: "0 auto",
-              boxSizing: "border-box",
+              background: "var(--room-bg)",
               scrollSnapAlign: "start",
+              boxSizing: "border-box",
+              overflow: "hidden",
             }}
           >
+            {/* Video background */}
+            <VideoBackground
+              src="/movies/diagnose/desktop/04-effect-1080p.webm"
+              mobileSrc="/movies/diagnose/mobile/04-effect-720p.webm"
+              playbackRate={1}
+              paused={activeSection !== "04 The Binary 1702 Effect"}
+              darkOverlay={0.6}
+            />
+
+            {/* Content */}
+            <div
+              style={{
+                position: "relative",
+                zIndex: 2,
+                minHeight: "100vh",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                padding: "120px clamp(24px,5.5vw,96px)",
+                maxWidth: 1320,
+                margin: "0 auto",
+                boxSizing: "border-box",
+              }}
+            >
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "minmax(0,10ch) minmax(0,1fr) minmax(280px,420px)",
-                gap: "clamp(16px,4vw,48px)",
-                alignItems: "center",
+                gridTemplateColumns: isMobile
+                  ? "1fr"
+                  : "minmax(0,10ch) minmax(0,1fr) minmax(280px,420px)",
+                gap: isMobile ? "24px" : "clamp(16px,4vw,48px)",
+                alignItems: isMobile ? "start" : "center",
               }}
             >
-              <div style={{ ...chapterNumeral, alignSelf: "start", paddingTop: 8 }}>04</div>
+              {!isMobile && <div style={{ ...chapterNumeral, alignSelf: "start", paddingTop: 8 }}>04</div>}
               <div>
+                {/* Mobile chapter numeral */}
+                {isMobile && (
+                  <p style={{ ...chapterNumeral, margin: "0 0 8px" }}>04</p>
+                )}
                 <p
                   style={{
                     margin: "0 0 calc(24px * var(--pace))",
@@ -283,7 +602,7 @@ export default function DiagnosePage() {
                     margin: 0,
                     fontFamily: serif,
                     fontWeight: 400,
-                    fontSize: "clamp(1.6rem, 3vw, 2.4rem)",
+                    fontSize: isMobile ? "clamp(1.4rem, 6vw, 1.8rem)" : "clamp(1.6rem, 3vw, 2.4rem)",
                     lineHeight: 1.15,
                     letterSpacing: "-0.015em",
                     maxWidth: "32ch",
@@ -292,68 +611,81 @@ export default function DiagnosePage() {
                   This is what you leave with after Diagnosis.
                 </h2>
 
-                {/* Outcomes group */}
+                {/* Outcomes group - 3 in a row on mobile, vertical on desktop */}
                 <div
                   style={{
-                    marginTop: spacing.headlineToOutcomes,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: spacing.outcomeGroupGap,
-                    maxWidth: spacing.outcomeMaxWidth,
+                    marginTop: isMobile ? 32 : spacing.headlineToOutcomes,
+                    display: "grid",
+                    gridTemplateColumns: isMobile ? "repeat(3, 1fr)" : "1fr",
+                    gap: isMobile ? 8 : spacing.outcomeGroupGap,
+                    maxWidth: isMobile ? "100%" : spacing.outcomeMaxWidth,
                   }}
                 >
-                  <div
-                    className="outcome-system-map"
-                    onClick={() => handleModelChange("system-map")}
-                  >
-                    <p style={outcomeLabel}>01&emsp;Clarity</p>
-                    <p style={outcomeTitle}>System Map</p>
-                  </div>
-                  <div
-                    className="outcome-strategy"
-                    onClick={() => handleModelChange("strategy")}
-                  >
-                    <p style={outcomeLabel}>02&emsp;Direction</p>
-                    <p style={outcomeTitle}>The Strategy</p>
-                  </div>
-                  <div
-                    className="outcome-blueprint"
-                    onClick={() => handleModelChange("blueprint")}
-                  >
-                    <p style={outcomeLabel}>03&emsp;Confidence</p>
-                    <p style={outcomeTitle}>The Blueprint</p>
-                  </div>
+                  {[
+                    { model: "system-map" as const, num: "01", label: "Clarity", title: "System Map" },
+                    { model: "strategy" as const, num: "02", label: "Direction", title: "Strategy" },
+                    { model: "blueprint" as const, num: "03", label: "Confidence", title: "Blueprint" },
+                  ].map((outcome) => (
+                    <div
+                      key={outcome.model}
+                      onClick={() => handleModelChange(outcome.model)}
+                      style={{
+                        cursor: "pointer",
+                        padding: isMobile ? "10px 8px" : "0",
+                        minHeight: isMobile ? 44 : "auto",
+                        borderRadius: isMobile ? 8 : 0,
+                        background: isMobile
+                          ? activeModel === outcome.model
+                            ? "rgba(139,92,246,0.2)"
+                            : "rgba(255,255,255,0.05)"
+                          : "transparent",
+                        border: isMobile
+                          ? activeModel === outcome.model
+                            ? "1px solid rgba(139,92,246,0.4)"
+                            : "1px solid rgba(255,255,255,0.1)"
+                          : "none",
+                        transition: "background 200ms ease, border-color 200ms ease",
+                      }}
+                    >
+                      <p style={{
+                        ...outcomeLabel,
+                        fontSize: isMobile ? 9 : 11,
+                        letterSpacing: isMobile ? "0.1em" : "0.18em",
+                      }}>{outcome.num}&ensp;{outcome.label}</p>
+                      <p style={{
+                        ...outcomeTitle,
+                        fontSize: isMobile ? "clamp(0.95rem, 3.5vw, 1.1rem)" : outcomeTitle.fontSize,
+                        margin: isMobile ? "6px 0 0" : `${spacing.outcomeInternalGap}px 0 0`,
+                      }}>{outcome.title}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* 3D Model */}
+              {/* 3D Model - clipped to create reveal effect */}
               <div style={{
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 position: "relative",
-                overflow: "hidden",
+                order: isMobile ? -1 : 0, // Model appears before selectors on mobile
               }}>
-                <div style={{ height: 450, width: "100%" }}>
-                  <Scene3D model={activeModel} />
-                </div>
-                {/* Curtain overlay - appears instantly, slides down to reveal */}
                 <div
                   style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: "var(--paper)",
-                    transform: modelVisible ? "translateY(-100%)" : "translateY(0)",
-                    transition: modelVisible ? "transform 0.9s ease-out" : "none",
-                    pointerEvents: "none",
+                    height: isMobile ? "clamp(200px, 32vh, 280px)" : "clamp(280px, 50vh, 450px)",
+                    width: "100%",
+                    clipPath: modelVisible
+                      ? "inset(0% 0% 0% 0%)"
+                      : "inset(0% 0% 100% 0%)",
+                    transition: "clip-path 1.8s cubic-bezier(0.76, 0, 0.24, 1)",
                   }}
-                />
+                >
+                  <Scene3D model={activeModel} />
+                </div>
                 <p style={{
                   ...outcomeTitle,
                   margin: "16px 0 0",
+                  fontSize: isMobile ? "clamp(1.2rem, 5vw, 1.5rem)" : outcomeTitle.fontSize,
                   color: activeModel === "system-map" ? "#C9A227"
                        : activeModel === "strategy" ? "#6B4C9A"
                        : "#4A7BB7",
@@ -361,236 +693,28 @@ export default function DiagnosePage() {
                             : activeModel === "strategy" ? "0 0 20px rgba(107, 76, 154, 0.6)"
                             : "0 0 20px rgba(74, 123, 183, 0.6)",
                 }}>
-                  {activeModel === "system-map" && "The System Map"}
-                  {activeModel === "strategy" && "The Strategy"}
-                  {activeModel === "blueprint" && "The Blueprint"}
+                  {activeModel === "system-map" && "System Map"}
+                  {activeModel === "strategy" && "Strategy"}
+                  {activeModel === "blueprint" && "Blueprint"}
                 </p>
-                <p style={outcomeCaption}>
+                <p style={{
+                  ...outcomeCaption,
+                  textAlign: "center",
+                  padding: isMobile ? "0 16px" : 0,
+                }}>
                   {activeModel === "system-map" && "A tailored business map, from our point of view."}
                   {activeModel === "strategy" && "Our recommendation for what to do next and why."}
                   {activeModel === "blueprint" && "If you want to continue with us, this is what it will look like."}
                 </p>
               </div>
             </div>
+            </div>
           </section>
         );
       })()}
 
       {/* 05 — The Decision */}
-      {(() => {
-        const PATHS = [
-          {
-            id: "build",
-            label: "Build",
-            numeral: "01",
-            color: "#8B5A5A",
-            href: "/services/build",
-            tagline: "0 → 1.",
-            bullets: [
-              "Let's turn an idea into something real.",
-            ],
-            grounding: "Websites · Automations · Integrations · AI Systems",
-          },
-          {
-            id: "care",
-            label: "Care",
-            numeral: "02",
-            color: "#5A7A8B",
-            href: "/services/care",
-            tagline: "Keep running.",
-            bullets: [
-              "Let’s keep what you have working.",
-            ],
-            grounding: "Maintenance · Improvements · Technical Support",
-          },
-          {
-            id: "grow",
-            label: "Grow",
-            numeral: "03",
-            color: "#5A7A5A",
-            href: "/services/grow",
-            tagline: "Get seen.",
-            bullets: [
-              "Let’s grow the audience."
-            ],
-            grounding: "SEO · Content · Campaigns · Distribution",
-          },
-        ];
-
-        return (
-          <section
-            data-screen-label="05 The Decision"
-            style={{
-              minHeight: "100vh",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "flex-start",
-              padding: "calc(120px * var(--pace)) clamp(24px,5.5vw,96px) 120px",
-              maxWidth: 1320,
-              margin: "0 auto",
-              boxSizing: "border-box",
-              scrollSnapAlign: "start",
-            }}
-          >
-            {/* Header */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "minmax(0,10ch) minmax(0,1fr)",
-                gap: "clamp(16px,4vw,48px)",
-                marginBottom: "calc(80px * var(--pace))",
-              }}
-            >
-              <div style={chapterNumeral}>05</div>
-              <div>
-                <p
-                  style={{
-                    margin: "0 0 calc(24px * var(--pace))",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    letterSpacing: "0.15em",
-                    textTransform: "uppercase",
-                    color: "var(--faint)",
-                  }}
-                >
-                  The Decision
-                </p>
-                <h2
-                  style={{
-                    margin: 0,
-                    fontFamily: serif,
-                    fontWeight: 400,
-                    fontSize: "clamp(2rem, 5vw, 3.5rem)",
-                    lineHeight: 1.08,
-                    letterSpacing: "-0.02em",
-                  }}
-                >
-                  Now we know what to do.
-                </h2>
-              </div>
-            </div>
-
-            {/* Three Paths */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "clamp(24px, 4vw, 48px)",
-              }}
-              className="decision-paths"
-            >
-              {PATHS.map((path) => (
-                  <Link
-                    key={path.id}
-                    href={path.href}
-                    className={`decision-path-${path.id}`}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      textAlign: "center",
-                      textDecoration: "none",
-                      cursor: "pointer",
-                      padding: "clamp(20px, 2.5vw, 32px)",
-                    }}
-                  >
-                    {/* Numeral */}
-                    <span
-                      style={{
-                        fontSize: 11,
-                        fontWeight: 600,
-                        letterSpacing: "0.18em",
-                        color: path.color,
-                        marginBottom: 12,
-                      }}
-                    >
-                      {path.numeral}
-                    </span>
-
-                    {/* Big Title */}
-                    <span
-                      style={{
-                        fontFamily: serif,
-                        fontSize: "clamp(2rem, 4vw, 3.2rem)",
-                        fontWeight: 400,
-                        letterSpacing: "-0.02em",
-                        lineHeight: 1,
-                        color: path.color,
-                        marginBottom: "clamp(16px, 2vw, 24px)",
-                      }}
-                    >
-                      {path.label}
-                    </span>
-
-                    {/* Horizontal rule */}
-                    <span
-                      style={{
-                        width: "100%",
-                        maxWidth: 120,
-                        height: 1,
-                        background: path.color,
-                        opacity: 0.5,
-                        marginBottom: "clamp(16px, 2vw, 24px)",
-                      }}
-                    />
-
-                    {/* Tagline */}
-                    <span
-                      style={{
-                        fontFamily: serif,
-                        fontSize: "clamp(1.2rem, 1.6vw, 1.5rem)",
-                        fontWeight: 400,
-                        fontStyle: "italic",
-                        letterSpacing: "-0.01em",
-                        lineHeight: 1.3,
-                        color: "var(--ink)",
-                        marginBottom: "clamp(20px, 2.5vw, 28px)",
-                      }}
-                    >
-                      {path.tagline}
-                    </span>
-
-                    {/* Bullets */}
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 8,
-                        marginBottom: "clamp(24px, 3vw, 32px)",
-                      }}
-                    >
-                      {path.bullets.map((bullet, i) => (
-                        <span
-                          key={i}
-                          style={{
-                            fontSize: "clamp(0.9rem, 1vw, 1rem)",
-                            lineHeight: 1.5,
-                            color: "var(--graphite)",
-                          }}
-                        >
-                          {bullet}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Grounding line */}
-                    <span
-                      style={{
-                        fontSize: "clamp(0.75rem, 0.85vw, 0.85rem)",
-                        letterSpacing: "0.02em",
-                        color: "var(--faint)",
-                        marginTop: "auto",
-                      }}
-                    >
-                      {path.grounding}
-                    </span>
-                  </Link>
-              ))}
-            </div>
-
-          </section>
-        );
-      })()}
+      <DecisionSection activeSection={activeSection} chapterNumeral={chapterNumeral} serif={serif} />
 
       <SiteFooter />
     </div>

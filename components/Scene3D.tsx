@@ -6,15 +6,30 @@ import { Bounds, Center, useGLTF, ContactShadows } from "@react-three/drei";
 import type { Group, Mesh } from "three";
 
 const MODELS = {
-  "system-map": { path: "/3d/system-map.glb", orientation: [0, 0, 0], spinAxis: "y" },
-  "strategy": { path: "/3d/strategy.glb", orientation: [0, 0, 0], spinAxis: "y" },
-  "blueprint": { path: "/3d/blueprint.glb", orientation: [0, 0, 0], spinAxis: "y" },
+  "system-map": {
+    path: "/3d/system-map.glb",
+    orientation: [0, 0, 0] as [number, number, number],
+    spinAxis: "y",
+    offset: [0, 0, 0] as [number, number, number],
+  },
+  "strategy": {
+    path: "/3d/strategy.glb",
+    orientation: [0, 0, 0] as [number, number, number],
+    spinAxis: "y",
+    offset: [0, 0, 0] as [number, number, number],
+  },
+  "blueprint": {
+    path: "/3d/blueprint.glb",
+    orientation: [0, 0, 0] as [number, number, number],
+    spinAxis: "y",
+    offset: [0, 0, 0] as [number, number, number],
+  },
 } as const;
 
 export type ModelType = keyof typeof MODELS;
 
-// Preload all models
-Object.values(MODELS).forEach((m) => useGLTF.preload(m.path));
+// Track which models have been preloaded
+const preloadedModels = new Set<string>();
 
 function RotatingModel({ model, rotate }: { model: ModelType; rotate: boolean }) {
   const spinRef = useRef<Group>(null);
@@ -34,23 +49,25 @@ function RotatingModel({ model, rotate }: { model: ModelType; rotate: boolean })
   }, [scene]);
 
   useFrame((_, delta) => {
-    if (rotate && spinRef.current && config.spinAxis !== "none") {
-      spinRef.current.rotation[config.spinAxis as "x" | "y" | "z"] += delta * 0.14;
+    if (rotate && spinRef.current) {
+      spinRef.current.rotation[config.spinAxis] += delta * 0.14;
     }
   });
 
   return (
-    <group
-      rotation={[
-        config.orientation[0],
-        config.orientation[1],
-        config.orientation[2],
-      ]}
-    >
-      <group ref={spinRef}>
-        <Center>
-          <primitive object={clonedScene} />
-        </Center>
+    <group position={config.offset}>
+      <group
+        rotation={[
+          config.orientation[0],
+          config.orientation[1],
+          config.orientation[2],
+        ]}
+      >
+        <group ref={spinRef}>
+          <Center>
+            <primitive object={clonedScene} />
+          </Center>
+        </group>
       </group>
     </group>
   );
@@ -70,6 +87,36 @@ export default function Scene3D({ model = "system-map" }: Scene3DProps) {
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, []);
+
+  // Preload current model on mount
+  useEffect(() => {
+    const config = MODELS[model];
+    if (!preloadedModels.has(config.path)) {
+      useGLTF.preload(config.path);
+      preloadedModels.add(config.path);
+    }
+  }, [model]);
+
+  // Opportunistically preload other models during idle time
+  useEffect(() => {
+    if (typeof requestIdleCallback === "undefined") return;
+
+    const otherModels = (Object.keys(MODELS) as ModelType[]).filter((k) => k !== model);
+    const ids: number[] = [];
+
+    otherModels.forEach((key) => {
+      const config = MODELS[key];
+      if (!preloadedModels.has(config.path)) {
+        const id = requestIdleCallback(() => {
+          useGLTF.preload(config.path);
+          preloadedModels.add(config.path);
+        });
+        ids.push(id);
+      }
+    });
+
+    return () => ids.forEach((id) => cancelIdleCallback(id));
+  }, [model]);
 
   return (
     <div

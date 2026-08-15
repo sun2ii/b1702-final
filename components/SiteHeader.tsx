@@ -9,10 +9,10 @@ const bgForTheme = (theme: SectionTheme, isMobile: boolean) =>
   isMobile ? "transparent" : theme === "dark" ? "var(--room-bg)" : theme === "muted" ? "var(--muted)" : "var(--paper)";
 
 const serviceItems = [
-  { href: "/services/diagnose", label: "00. Diagnose" },
-  { href: "/services/build", label: "01. Build" },
-  { href: "/services/care", label: "02. Care" },
-  { href: "/services/grow", label: "03. Grow" },
+  { href: "/services/diagnose", label: "00. Diagnose", disabled: false },
+  { href: "/services/build", label: "01. Build", disabled: true },
+  { href: "/services/care", label: "02. Care", disabled: true },
+  { href: "/services/grow", label: "03. Grow", disabled: true },
 ];
 
 type Props = {
@@ -27,9 +27,10 @@ export default function SiteHeader({ introComplete = true }: Props) {
   const [backgroundHidden, setBackgroundHidden] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
+  const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 600);
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
@@ -51,6 +52,7 @@ export default function SiteHeader({ introComplete = true }: Props) {
 
   const handleLinkClick = () => {
     setMenuOpen(false);
+    setMobileServicesOpen(false);
     setTimeout(() => setMenuVisible(false), 450);
     setTimeout(() => setBackgroundHidden(false), 600);
   };
@@ -111,7 +113,7 @@ export default function SiteHeader({ introComplete = true }: Props) {
         <Link
           href="/"
           style={{
-            fontSize: 13,
+            fontSize: "clamp(12px, 1.5vw, 14px)",
             fontWeight: 600,
             letterSpacing: "0.25em",
             textTransform: "uppercase",
@@ -125,7 +127,7 @@ export default function SiteHeader({ introComplete = true }: Props) {
         {/* Desktop nav */}
         <nav className="nav-desktop">
           {/* Services dropdown */}
-          <Link href="/careers" className={isDark ? "nav-link-dark" : "nav-link"}>Careers</Link>
+          {/* <Link href="/careers" className={isDark ? "nav-link-dark" : "nav-link"}>Careers</Link> */}
           <div
             style={{ position: "relative", display: "inline-flex", alignItems: "baseline" }}
             onMouseEnter={() => setServicesOpen(true)}
@@ -162,14 +164,30 @@ export default function SiteHeader({ introComplete = true }: Props) {
                 }}
               >
                 {serviceItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={isDark ? "nav-link-dark" : "nav-link"}
-                    style={{ whiteSpace: "nowrap", width: "fit-content" }}
-                  >
-                    {item.label}
-                  </Link>
+                  item.disabled ? (
+                    <span
+                      key={item.href}
+                      className={isDark ? "nav-link-dark" : "nav-link"}
+                      style={{
+                        whiteSpace: "nowrap",
+                        width: "fit-content",
+                        opacity: 0.35,
+                        cursor: "default",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      {item.label}
+                    </span>
+                  ) : (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={isDark ? "nav-link-dark" : "nav-link"}
+                      style={{ whiteSpace: "nowrap", width: "fit-content" }}
+                    >
+                      {item.label}
+                    </Link>
+                  )
                 ))}
               </div>
             </div>
@@ -177,12 +195,17 @@ export default function SiteHeader({ introComplete = true }: Props) {
           {/* <Link href="/studio" className={isDark ? "nav-link-dark" : "nav-link"}>Studio</Link>
           <Link href="/labs" className={isDark ? "nav-link-dark" : "nav-link"}>Labs</Link>
           <Link href="/journal" className={isDark ? "nav-link-dark" : "nav-link"}>Journal</Link> */}
-          <Link href="/case-studies" className={isDark ? "nav-link-dark" : "nav-link"}>Case Studies</Link>
-          <Link href="/about" className={isDark ? "nav-link-dark" : "nav-link"}>About</Link>
+          {/* <Link href="/case-studies" className={isDark ? "nav-link-dark" : "nav-link"}>Case Studies</Link> */}
+          <span
+            className={isDark ? "nav-link-dark" : "nav-link"}
+            style={{ opacity: 0.35, cursor: "default", pointerEvents: "none" }}
+          >
+            About
+          </span>
           {/* <ThemeToggle isDark={isDark} /> */}
         </nav>
 
-        {/* Mobile hamburger */}
+        {/* Mobile hamburger - 44x44 minimum tap target for accessibility */}
         <button
           className="hamburger"
           onClick={handleMenuToggle}
@@ -191,10 +214,12 @@ export default function SiteHeader({ introComplete = true }: Props) {
             background: "none",
             border: "none",
             cursor: "pointer",
-            padding: 4,
-            width: 24,
-            height: 24,
+            padding: 10,
+            width: 44,
+            height: 44,
             position: "relative",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <span
@@ -256,21 +281,81 @@ export default function SiteHeader({ introComplete = true }: Props) {
             paddingBottom: 30,
           }}
         >
-          <Link
-            href="/services"
+          <div style={{ display: "flex", flexDirection: "column", gap: mobileServicesOpen ? 32 : 0 }}>
+            <button
+              className={isDark ? "nav-link-dark" : "nav-link"}
+              onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                padding: 0,
+                font: "inherit",
+                textAlign: "left",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              Services
+              <span
+                style={{
+                  display: "inline-block",
+                  transform: mobileServicesOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 0.25s ease",
+                  fontSize: "0.7em",
+                }}
+              >
+                ▼
+              </span>
+            </button>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 28,
+                paddingLeft: 16,
+                maxHeight: mobileServicesOpen ? 300 : 0,
+                opacity: mobileServicesOpen ? 1 : 0,
+                overflow: "hidden",
+                transition: "max-height 0.3s ease, opacity 0.25s ease",
+              }}
+            >
+              {serviceItems.map((item) => (
+                item.disabled ? (
+                  <span
+                    key={item.href}
+                    className={isDark ? "nav-link-dark" : "nav-link"}
+                    style={{
+                      fontSize: "0.85em",
+                      opacity: 0.35,
+                      cursor: "default",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {item.label}
+                  </span>
+                ) : (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={isDark ? "nav-link-dark" : "nav-link"}
+                    onClick={handleLinkClick}
+                    style={{ fontSize: "0.85em" }}
+                  >
+                    {item.label}
+                  </Link>
+                )
+              ))}
+            </div>
+          </div>
+          <span
             className={isDark ? "nav-link-dark" : "nav-link"}
-            onClick={handleLinkClick}
-          >
-            Services
-          </Link>
-          <Link
-            href="/about"
-            className={isDark ? "nav-link-dark" : "nav-link"}
-            onClick={handleLinkClick}
+            style={{ opacity: 0.35, cursor: "default", pointerEvents: "none" }}
           >
             About
-          </Link>
-          <Link
+          </span>
+          {/* <Link
             href="/case-studies"
             className={isDark ? "nav-link-dark" : "nav-link"}
             onClick={handleLinkClick}
@@ -283,7 +368,7 @@ export default function SiteHeader({ introComplete = true }: Props) {
             onClick={handleLinkClick}
           >
             Careers
-          </Link>
+          </Link> */}
         </nav>
       )}
       </div>

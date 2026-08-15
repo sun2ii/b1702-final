@@ -59,6 +59,12 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
+  overflow-x: hidden;
+}
+
+/* Prevent horizontal scroll on all sections */
+section {
+  overflow-x: hidden;
 }
 
 /* Theme switch cross-fade */
@@ -124,8 +130,8 @@ input:focus, textarea:focus {
 .hamburger { display: none; }
 .nav-mobile { display: none; }
 
-/* Mobile nav (under 600px) - show hamburger, hide desktop links */
-@media (max-width: 600px) {
+/* Mobile nav (under 768px) - show hamburger, hide desktop links */
+@media (max-width: 767px) {
   .nav-desktop { display: none !important; }
   .hamburger { display: block !important; }
   .nav-mobile { display: flex !important; }

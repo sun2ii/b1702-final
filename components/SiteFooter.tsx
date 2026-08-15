@@ -8,19 +8,16 @@ type FooterProps = {
   introComplete?: boolean;
 };
 
-const defaultCta = { href: "/start-here", label: "Start here" };
-
 const bgForTheme = (theme: SectionTheme, isMobile: boolean) =>
   isMobile ? "transparent" : theme === "dark" ? "var(--room-bg)" : theme === "muted" ? "var(--muted)" : "var(--paper)";
 
 export default function SiteFooter({ introComplete = true }: FooterProps) {
-  const cta = defaultCta;
   const theme = useSectionTheme();
   const isDark = theme === "dark";
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 600);
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
@@ -72,7 +69,7 @@ export default function SiteFooter({ introComplete = true }: FooterProps) {
         >
           <span
             style={{
-              fontSize: 11,
+              fontSize: "clamp(10px, 1.2vw, 12px)",
               letterSpacing: "0.14em",
               color: isDark ? "var(--room-muted)" : "var(--rule)",
               transition: "color var(--theme-fade) ease",
@@ -81,10 +78,10 @@ export default function SiteFooter({ introComplete = true }: FooterProps) {
             MMXXVI
           </span>
           <Link
-            href={cta.href}
+            href="/lets-talk"
             className={isDark ? "foot-cta-dark" : "foot-cta"}
           >
-            {cta.label}
+            Let&apos;s talk
           </Link>
         </footer>
       </div>
