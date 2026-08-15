@@ -55,6 +55,13 @@ html {
   text-rendering: optimizeLegibility;
 }
 
+/* Intro scroll lock - applied during typewriter sequence */
+html.intro-locked,
+html.intro-locked body {
+  overflow: hidden;
+  touch-action: none;
+}
+
 body {
   margin: 0;
   background: var(--paper);

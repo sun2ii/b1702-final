@@ -125,6 +125,14 @@ export default function Home() {
     document.body.scrollTop = 0;
   }, []);
 
+  // Lock scroll during intro sequence
+  useEffect(() => {
+    document.documentElement.classList.toggle("intro-locked", !introComplete);
+    return () => {
+      document.documentElement.classList.remove("intro-locked");
+    };
+  }, [introComplete]);
+
   // Auto-start typewriter sequence if modal was skipped (returning visitor)
   useEffect(() => {
     if (skippedModal && !introStarted) {
@@ -277,7 +285,6 @@ export default function Home() {
             gap: "clamp(16px,4vw,48px)",
             height: "100%",
             boxSizing: "border-box",
-            overflow: introComplete ? "visible" : "hidden",
           }}
         >
           <div
