@@ -656,7 +656,12 @@ export default function DiagnosePage() {
                         ...outcomeTitle,
                         fontSize: isMobile ? "clamp(0.95rem, 3.5vw, 1.1rem)" : outcomeTitle.fontSize,
                         margin: isMobile ? "6px 0 0" : `${spacing.outcomeInternalGap}px 0 0`,
-                      }}>{outcome.title}</p>
+                        color: "#C9A227",
+                        transform: activeModel === outcome.model ? "scale(1.1)" : "scale(1)",
+                        transformOrigin: "left center",
+                        textShadow: activeModel === outcome.model ? "0 0 20px rgba(201, 162, 39, 0.6)" : "none",
+                        transition: "transform 300ms ease, text-shadow 300ms ease",
+                      }}><span style={{ marginRight: "0.5em", opacity: 0.7 }}>›</span>{outcome.title}</p>
                     </div>
                   ))}
                 </div>
@@ -674,10 +679,7 @@ export default function DiagnosePage() {
                   style={{
                     height: isMobile ? "clamp(200px, 32vh, 280px)" : "clamp(280px, 50vh, 450px)",
                     width: "100%",
-                    clipPath: modelVisible
-                      ? "inset(0% 0% 0% 0%)"
-                      : "inset(0% 0% 100% 0%)",
-                    transition: "clip-path 1.8s cubic-bezier(0.76, 0, 0.24, 1)",
+                    overflow: "visible",
                   }}
                 >
                   <Scene3D model={activeModel} />
@@ -686,12 +688,8 @@ export default function DiagnosePage() {
                   ...outcomeTitle,
                   margin: "16px 0 0",
                   fontSize: isMobile ? "clamp(1.2rem, 5vw, 1.5rem)" : outcomeTitle.fontSize,
-                  color: activeModel === "system-map" ? "#C9A227"
-                       : activeModel === "strategy" ? "#6B4C9A"
-                       : "#4A7BB7",
-                  textShadow: activeModel === "system-map" ? "0 0 20px rgba(201, 162, 39, 0.6)"
-                            : activeModel === "strategy" ? "0 0 20px rgba(107, 76, 154, 0.6)"
-                            : "0 0 20px rgba(74, 123, 183, 0.6)",
+                  color: "#C9A227",
+                  textShadow: "0 0 20px rgba(201, 162, 39, 0.6)",
                 }}>
                   {activeModel === "system-map" && "System Map"}
                   {activeModel === "strategy" && "Strategy"}

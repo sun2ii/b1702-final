@@ -349,10 +349,8 @@ export default function RealitySection() {
       {/* Video background - using desktop version for both (mobile 720p was poor quality) */}
       <VideoBackground
         src="/movies/diagnose/desktop/03-reality-1080p.webm"
-        playbackRate={1}
+        playbackRate={0.65}
         paused={activeSection !== "03 The Reality"}
-        fadeDuration={0}
-        pauseDuration={0}
       />
 
       {/* Chapter header — fixed position at top, matching 02 (desktop only) */}

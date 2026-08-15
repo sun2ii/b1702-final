@@ -59,7 +59,7 @@ export default function SiteFooter({ introComplete = true }: FooterProps) {
         <footer
           style={{
             display: "flex",
-            justifyContent: "space-between",
+            justifyContent: "flex-end",
             alignItems: "baseline",
             gap: 32,
             padding: "10px 0",
@@ -67,16 +67,6 @@ export default function SiteFooter({ introComplete = true }: FooterProps) {
             transition: "opacity 2.5s ease-out 0.5s",
           }}
         >
-          <span
-            style={{
-              fontSize: "clamp(10px, 1.2vw, 12px)",
-              letterSpacing: "0.14em",
-              color: isDark ? "var(--room-muted)" : "var(--rule)",
-              transition: "color var(--theme-fade) ease",
-            }}
-          >
-            MMXXVI
-          </span>
           <Link
             href="/lets-talk"
             className={isDark ? "foot-cta-dark" : "foot-cta"}

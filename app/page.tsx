@@ -85,6 +85,7 @@ const fitItem: CSSProperties = {
   lineHeight: 1.54,
   letterSpacing: "0.004em",
   textWrap: "pretty",
+  color: "#F5F2EA",
 };
 
 // Network speed detection for preload decisions
@@ -239,7 +240,6 @@ export default function Home() {
           poster="/poster/cityscape.webp"
           preload={shouldPreload("01 Threshold") ? "auto" : "none"}
           paused={!introComplete || activeSection !== "01 Threshold"}
-          fadeInOnStart
         />
 
         {/* Dark overlay */}
