@@ -635,24 +635,28 @@ export default function DiagnosePage() {
                   }}
                 >
                   {[
-                    { model: "system-map" as const, num: "01", label: "Clarity", title: "System Map" },
-                    { model: "strategy" as const, num: "02", label: "Direction", title: "Strategy" },
-                    { model: "blueprint" as const, num: "03", label: "Confidence", title: "Blueprint" },
+                    { model: "system-map" as const, num: "01", label: "Clarity", title: "System Map", mobileTitle: "Map" },
+                    { model: "strategy" as const, num: "02", label: "Direction", title: "Strategy", mobileTitle: "Strategy" },
+                    { model: "blueprint" as const, num: "03", label: "Confidence", title: "Blueprint", mobileTitle: "Blueprint" },
                   ].map((outcome) => (
                     <div
                       key={outcome.model}
                       onClick={() => handleModelChange(outcome.model)}
                       style={{
                         cursor: "pointer",
-                        padding: isMobile ? "10px 8px" : "12px 16px",
+                        padding: isMobile ? "10px 8px" : "0",
                         minHeight: isMobile ? 44 : "auto",
-                        borderRadius: 8,
-                        background: activeModel === outcome.model
-                          ? "rgba(139,92,246,0.2)"
-                          : "rgba(255,255,255,0.05)",
-                        border: activeModel === outcome.model
-                          ? "1px solid rgba(139,92,246,0.4)"
-                          : "1px solid rgba(255,255,255,0.1)",
+                        borderRadius: isMobile ? 8 : 0,
+                        background: isMobile
+                          ? activeModel === outcome.model
+                            ? "rgba(139,92,246,0.2)"
+                            : "rgba(255,255,255,0.05)"
+                          : "transparent",
+                        border: isMobile
+                          ? activeModel === outcome.model
+                            ? "1px solid rgba(139,92,246,0.4)"
+                            : "1px solid rgba(255,255,255,0.1)"
+                          : "none",
                         transition: "background 200ms ease, border-color 200ms ease",
                       }}
                     >
@@ -666,7 +670,12 @@ export default function DiagnosePage() {
                         fontSize: isMobile ? "clamp(0.95rem, 3.5vw, 1.1rem)" : outcomeTitle.fontSize,
                         margin: isMobile ? "6px 0 0" : `${spacing.outcomeInternalGap}px 0 0`,
                         color: "#C9A227",
-                      }}><span style={{ marginRight: "0.5em", opacity: 0.7 }}>›</span>{outcome.title}</p>
+                        transform: !isMobile && activeModel === outcome.model ? "scale(1.1)" : "scale(1)",
+                        transformOrigin: "left center",
+                        textShadow: !isMobile && activeModel === outcome.model ? "0 0 20px rgba(201, 162, 39, 0.6)" : "none",
+                        transition: "transform 300ms ease, text-shadow 300ms ease",
+                        whiteSpace: "nowrap",
+                      }}><span style={{ marginRight: "0.5em", opacity: 0.7 }}>›</span>{isMobile ? outcome.mobileTitle : outcome.title}</p>
                     </div>
                   ))}
                 </div>
@@ -684,7 +693,15 @@ export default function DiagnosePage() {
                   style={{
                     height: isMobile ? "clamp(160px, 25vh, 220px)" : "clamp(280px, 50vh, 450px)",
                     width: "100%",
-                    overflow: "visible",
+                    overflow: "hidden",
+                    clipPath: modelVisible
+                      ? "inset(0% 0% 0% 0%)"
+                      : "inset(0% 0% 100% 0%)",
+                    WebkitClipPath: modelVisible
+                      ? "inset(0% 0% 0% 0%)"
+                      : "inset(0% 0% 100% 0%)",
+                    transition:
+                      "clip-path 1.8s cubic-bezier(0.76, 0, 0.24, 1), -webkit-clip-path 1.8s cubic-bezier(0.76, 0, 0.24, 1)",
                   }}
                 >
                   <Scene3D model={activeModel} />
