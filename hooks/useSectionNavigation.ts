@@ -5,24 +5,68 @@ import { dispatchThemeChange, type SectionTheme } from "./useSectionTheme";
 import { dispatchSectionChange } from "./useActiveSection";
 
 /**
- * Hook that enables arrow key navigation between sections.
+ * Navigate to a specific section by index and handle theme/label updates.
+ */
+function navigateToSection(sections: NodeListOf<Element>, index: number) {
+  if (index < 0 || index >= sections.length) return;
+
+  const section = sections[index] as HTMLElement;
+  const theme = section.getAttribute("data-theme") as SectionTheme;
+  const label = section.getAttribute("data-screen-label");
+
+  if (theme) dispatchThemeChange(theme);
+  if (label) dispatchSectionChange(label);
+
+  sections.forEach((s) => s.classList.add("section-blur"));
+  setTimeout(() => {
+    sections.forEach((s) => s.classList.remove("section-blur"));
+  }, 600);
+
+  section.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+/**
+ * Hook that enables keyboard navigation between sections.
+ * - Arrow Up/Down: Navigate to previous/next section
+ * - Number keys 1-9: Jump directly to section by index
+ *
  * Sections must have `data-screen-label` attribute to be navigable.
  * Optionally supports `data-theme` for theme switching on navigation.
  */
 export function useSectionNavigation() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
+
+      const sections = document.querySelectorAll("section[data-screen-label]");
+
+      // Handle number keys 1-5 for direct section navigation
+      // Skip if any modifier key is pressed (Cmd, Ctrl, Alt)
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      const num = parseInt(e.key, 10);
+      if (num >= 1 && num <= 5) {
+        e.preventDefault();
+        navigateToSection(sections, num - 1);
+        return;
+      }
+
+      // Handle arrow keys
       if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
 
       e.preventDefault();
 
-      const sections = document.querySelectorAll("section[data-screen-label]");
       let currentSection = -1;
 
       // Find which section is currently most visible
       sections.forEach((section, index) => {
         const rect = section.getBoundingClientRect();
-        // If section top is within the top 30% of viewport, it's the current one
         if (rect.top >= -100 && rect.top < window.innerHeight * 0.3) {
           currentSection = index;
         }
@@ -38,29 +82,10 @@ export function useSectionNavigation() {
         });
       }
 
-      const applyBlur = () => {
-        sections.forEach((s) => s.classList.add("section-blur"));
-        setTimeout(() => {
-          sections.forEach((s) => s.classList.remove("section-blur"));
-        }, 600);
-      };
-
-      if (e.key === "ArrowDown" && currentSection < sections.length - 1) {
-        const nextSection = sections[currentSection + 1] as HTMLElement;
-        const nextTheme = nextSection.getAttribute("data-theme") as SectionTheme;
-        const nextLabel = nextSection.getAttribute("data-screen-label");
-        if (nextTheme) dispatchThemeChange(nextTheme);
-        if (nextLabel) dispatchSectionChange(nextLabel);
-        applyBlur();
-        nextSection.scrollIntoView({ behavior: "smooth", block: "start" });
-      } else if (e.key === "ArrowUp" && currentSection > 0) {
-        const prevSection = sections[currentSection - 1] as HTMLElement;
-        const prevTheme = prevSection.getAttribute("data-theme") as SectionTheme;
-        const prevLabel = prevSection.getAttribute("data-screen-label");
-        if (prevTheme) dispatchThemeChange(prevTheme);
-        if (prevLabel) dispatchSectionChange(prevLabel);
-        applyBlur();
-        prevSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (e.key === "ArrowDown") {
+        navigateToSection(sections, currentSection + 1);
+      } else if (e.key === "ArrowUp") {
+        navigateToSection(sections, currentSection - 1);
       }
     };
 

@@ -22,6 +22,7 @@ export default function CarePage() {
       <SiteHeader />
 
       <main
+        className="coming-soon-page pulse-indicator"
         style={{
           flex: 1,
           display: "flex",

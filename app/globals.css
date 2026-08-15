@@ -218,6 +218,41 @@ input:focus, textarea:focus {
 .rule-link { border-bottom: 1px solid transparent; }
 .rule-link:hover { border-bottom-color: var(--sig-text); color: var(--ink); }
 
+/* Outcome hover colors */
+.outcome-system-map { cursor: pointer; transition: color 150ms ease, text-shadow 150ms ease; }
+.outcome-system-map:hover { color: #C9A227; text-shadow: 0 0 20px rgba(201, 162, 39, 0.6); } /* gold */
+
+.outcome-strategy { cursor: pointer; transition: color 150ms ease, text-shadow 150ms ease; }
+.outcome-strategy:hover { color: #6B4C9A; text-shadow: 0 0 20px rgba(107, 76, 154, 0.6); } /* binary purple */
+
+.outcome-blueprint { cursor: pointer; transition: color 150ms ease, text-shadow 150ms ease; }
+.outcome-blueprint:hover { color: #4A7BB7; text-shadow: 0 0 20px rgba(74, 123, 183, 0.6); } /* dark blue */
+
+/* Decision path hover glows + bright color + scale on hover */
+.decision-path-build,
+.decision-path-care,
+.decision-path-grow {
+  transition: text-shadow 250ms ease, transform 250ms ease;
+}
+
+.decision-path-build:hover {
+  text-shadow: 0 0 24px rgba(200, 80, 80, 0.6);
+  transform: scale(1.05);
+}
+.decision-path-build:hover span { color: #C85050 !important; }
+
+.decision-path-care:hover {
+  text-shadow: 0 0 24px rgba(80, 140, 180, 0.6);
+  transform: scale(1.05);
+}
+.decision-path-care:hover span { color: #508CB4 !important; }
+
+.decision-path-grow:hover {
+  text-shadow: 0 0 24px rgba(80, 160, 80, 0.6);
+  transform: scale(1.05);
+}
+.decision-path-grow:hover span { color: #50A050 !important; }
+
 /* Underline CTAs whose border thickens on hover; border itself stays
    inline (color varies per instance), so the hover needs !important */
 .cta-link { transition: border-bottom-width 150ms linear; }
@@ -306,8 +341,48 @@ section.section-blur::after {
   [data-band] { grid-template-columns: minmax(0, 1fr) !important; }
 }
 
+/* ============================================================
+   Coming Soon pages — fade-in + pulsing life indicator
+   ============================================================ */
+@keyframes pageReveal {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.coming-soon-page {
+  animation: pageReveal 0.6s ease-out both;
+}
+
+.pulse-indicator {
+  animation: pulseGlow 6s ease-in-out infinite;
+}
+
 @media (max-width: 768px) {
   .hide-on-mobile { display: none !important; }
+
+  /* Section 05 - Decision paths stack vertically on mobile */
+  .decision-paths {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+  }
+  .decision-paths > a {
+    padding: 32px 0 !important;
+    background: transparent !important;
+  }
+  /* On mobile, always show examples since no hover */
+  .decision-paths > a > div:last-child {
+    max-height: none !important;
+    opacity: 1 !important;
+  }
+  /* Add spacing below statement on mobile */
+  .decision-paths > a > span:nth-last-child(2) {
+    margin-bottom: 20px !important;
+  }
 
   /* Sections 02, 03, 04 - hide numeral, single column, center content */
   section[data-screen-label="02 The Named Thing"] > div,

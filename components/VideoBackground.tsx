@@ -88,7 +88,7 @@ export default function VideoBackground({
       video.removeEventListener("timeupdate", handleTimeUpdate);
       video.removeEventListener("ended", handleEnded);
     };
-  }, [playbackRate, fadeDuration, pauseDuration, paused]);
+  }, [playbackRate, fadeDuration, pauseDuration, paused, videoSrc, fadeInOnStart]);
 
   return (
     <video

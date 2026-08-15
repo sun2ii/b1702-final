@@ -125,6 +125,7 @@ export default function SiteHeader({ introComplete = true }: Props) {
         {/* Desktop nav */}
         <nav className="nav-desktop">
           {/* Services dropdown */}
+          <Link href="/careers" className={isDark ? "nav-link-dark" : "nav-link"}>Careers</Link>
           <div
             style={{ position: "relative", display: "inline-flex", alignItems: "baseline" }}
             onMouseEnter={() => setServicesOpen(true)}
@@ -176,6 +177,7 @@ export default function SiteHeader({ introComplete = true }: Props) {
           {/* <Link href="/studio" className={isDark ? "nav-link-dark" : "nav-link"}>Studio</Link>
           <Link href="/labs" className={isDark ? "nav-link-dark" : "nav-link"}>Labs</Link>
           <Link href="/journal" className={isDark ? "nav-link-dark" : "nav-link"}>Journal</Link> */}
+          <Link href="/case-studies" className={isDark ? "nav-link-dark" : "nav-link"}>Case Studies</Link>
           <Link href="/about" className={isDark ? "nav-link-dark" : "nav-link"}>About</Link>
           {/* <ThemeToggle isDark={isDark} /> */}
         </nav>
@@ -267,6 +269,20 @@ export default function SiteHeader({ introComplete = true }: Props) {
             onClick={handleLinkClick}
           >
             About
+          </Link>
+          <Link
+            href="/case-studies"
+            className={isDark ? "nav-link-dark" : "nav-link"}
+            onClick={handleLinkClick}
+          >
+            Case Studies
+          </Link>
+          <Link
+            href="/careers"
+            className={isDark ? "nav-link-dark" : "nav-link"}
+            onClick={handleLinkClick}
+          >
+            Careers
           </Link>
         </nav>
       )}

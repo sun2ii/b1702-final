@@ -21,6 +21,7 @@ export default function GrowPage() {
       <SiteHeader />
 
       <main
+        className="coming-soon-page pulse-indicator"
         style={{
           flex: 1,
           display: "flex",

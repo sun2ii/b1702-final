@@ -406,7 +406,7 @@ const PHASE_DURATIONS: PhaseConfig[] = [
 // After all quotes shown, spam phase reuses existing quotes
 const SPAM_DURATION = 8; // 8 seconds of chaos
 const SPAM_BURST = 5;    // 4-5 quotes flash at a time
-const SPAM_INTERVAL = 1700;
+const SPAM_INTERVAL = 3200;
 const BREATHING_FADE = 5.5;    // Slow fade-out (breath of relief)
 const BREATH_PAUSE = 1;        // Pause in darkness
 const SURRENDER_HOLD = 2.5;    // "Sound Familiar?" visible
@@ -508,7 +508,8 @@ export default function VoicesEntering({ onComplete }: Props) {
   const [animationKey, setAnimationKey] = useState(0);
   const [shuffledPositions, setShuffledPositions] = useState<number[]>([]);
   const [shuffledVoices, setShuffledVoices] = useState<string[]>([]);
-  const [spamHighlights, setSpamHighlights] = useState<Set<number>>(new Set());
+  // Map of voice index -> color index for stable colors during fade
+  const [spamHighlights, setSpamHighlights] = useState<Map<number, number>>(new Map());
 
   const totalVoices = Math.min(MAX_VOICES, BASE_POSITIONS.length);
 
@@ -548,18 +549,21 @@ export default function VoicesEntering({ onComplete }: Props) {
     setAnimationKey(k => k + 1);
   }, []);
 
-  // Track visibility — reset when leaving, start when entering
+  // Track visibility - animation runs once per page load, no reset on scroll
+  const hasPlayedRef = useRef(false);
+
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        const nowInView = entry.isIntersecting;
+
+        // Only start animation once, never reset
+        if (nowInView && !hasPlayedRef.current) {
+          hasPlayedRef.current = true;
           setIsInView(true);
-        } else {
-          setIsInView(false);
-          resetAnimation();
         }
       },
       { threshold: 0.5 }
@@ -567,7 +571,7 @@ export default function VoicesEntering({ onComplete }: Props) {
 
     observer.observe(container);
     return () => observer.disconnect();
-  }, [resetAnimation]);
+  }, []);
 
   // Animation timeline
   useEffect(() => {
@@ -645,19 +649,22 @@ export default function VoicesEntering({ onComplete }: Props) {
     return () => timeouts.forEach(clearTimeout);
   }, [phase, totalVoices, animationKey]);
 
-  // Spam phase: randomly highlight 4-5 existing quotes every 150ms
+  // Spam phase: randomly highlight 4-5 existing quotes with fade transitions
   useEffect(() => {
     if (phase !== "spam") {
-      setSpamHighlights(new Set());
+      setSpamHighlights(new Map());
       return;
     }
 
     const interval = setInterval(() => {
-      // Pick 4-5 random quotes to highlight
+      // Pick 4-5 random quotes to highlight with stable color assignments
       const count = 4 + Math.floor(Math.random() * 2); // 4 or 5
-      const highlights = new Set<number>();
+      const highlights = new Map<number, number>();
       while (highlights.size < count) {
-        highlights.add(Math.floor(Math.random() * visibleCount));
+        const voiceIdx = Math.floor(Math.random() * visibleCount);
+        if (!highlights.has(voiceIdx)) {
+          highlights.set(voiceIdx, Math.floor(Math.random() * ACTIVE_COLORS.length));
+        }
       }
       setSpamHighlights(highlights);
     }, SPAM_INTERVAL);
@@ -701,7 +708,7 @@ export default function VoicesEntering({ onComplete }: Props) {
         width: "100%",
         height: "100%",
         minHeight: "100vh",
-        background: "#000",
+        zIndex: 2,
       }}
     >
       {/* Chapter header */}
@@ -761,8 +768,9 @@ export default function VoicesEntering({ onComplete }: Props) {
           const isLatest = index === visibleCount - 1 && !isSpam;
           const isSpamHighlight = isSpam && spamHighlights.has(index);
 
-          // Spam: highlighted quotes get random color, others stay gray
-          const spamColor = ACTIVE_COLORS[Math.floor(Math.random() * 4)];
+          // Spam: highlighted quotes get stable color from map
+          const spamColorIndex = spamHighlights.get(index) ?? 0;
+          const spamColor = ACTIVE_COLORS[spamColorIndex];
 
           const displayColor = isSpamHighlight
             ? spamColor
@@ -771,6 +779,9 @@ export default function VoicesEntering({ onComplete }: Props) {
             ? spamColor
             : (isLatest ? ACTIVE_COLORS[index % 4] : "rgba(255,255,255,0.15)");
           const hasGlow = isLatest || isSpamHighlight;
+
+          // Longer transition during spam phase for smooth fade in/out
+          const transitionDuration = isSpam ? "0.8s" : "0.3s";
 
           return (
             <div
@@ -793,7 +804,7 @@ export default function VoicesEntering({ onComplete }: Props) {
                 transform: (isLatest || isSpamHighlight) ? "scale(1.3)" : "scale(1)",
                 pointerEvents: "none",
                 animation: "voiceFadeIn 0.6s ease forwards",
-                transition: "color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease, z-index 0.1s",
+                transition: `color ${transitionDuration} ease, border-color ${transitionDuration} ease, box-shadow ${transitionDuration} ease, transform ${transitionDuration} ease, z-index 0.1s`,
                 zIndex: isSpamHighlight ? 500 : (isLatest ? 400 : index + 1),
               }}
             >
