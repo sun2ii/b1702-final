@@ -277,6 +277,7 @@ export default function Home() {
             gap: "clamp(16px,4vw,48px)",
             height: "100%",
             boxSizing: "border-box",
+            overflow: introComplete ? "visible" : "hidden",
           }}
         >
           <div
